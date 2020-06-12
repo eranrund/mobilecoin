@@ -1780,21 +1780,22 @@ dependencies = [
 ]
 
 [[package]]
-name = "lmdb"
-version = "0.8.0"
+name = "lmdb-rkv"
+version = "0.14.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5b0908efb5d6496aa977d96f91413da2635a902e5e31dbef0bfb88986c248539"
+checksum = "447a296f7aca299cfbb50f4e4f3d49451549af655fb7215d7f8c0c3d64bad42b"
 dependencies = [
  "bitflags",
+ "byteorder",
  "libc",
- "lmdb-sys",
+ "lmdb-rkv-sys",
 ]
 
 [[package]]
-name = "lmdb-sys"
-version = "0.8.0"
+name = "lmdb-rkv-sys"
+version = "0.11.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d5b392838cfe8858e86fac37cf97a0e8c55cc60ba0a18365cadc33092f128ce9"
+checksum = "b27470ac25167b3afdfb6af8fcd3bc1be67de50ffbdaf4073378cfded6ae24a5"
 dependencies = [
  "cc",
  "libc",
@@ -2507,7 +2508,7 @@ version = "0.2.0"
 dependencies = [
  "curve25519-dalek",
  "failure",
- "lmdb",
+ "lmdb-rkv",
  "mc-common",
  "mc-crypto-keys",
  "mc-crypto-rand",
@@ -2597,7 +2598,7 @@ dependencies = [
  "futures",
  "grpcio",
  "hex_fmt",
- "lmdb",
+ "lmdb-rkv",
  "lru",
  "mc-attest-core",
  "mc-common",
@@ -3261,7 +3262,7 @@ name = "mc-watcher"
 version = "0.2.0"
 dependencies = [
  "failure",
- "lmdb",
+ "lmdb-rkv",
  "mc-api",
  "mc-common",
  "mc-crypto-keys",

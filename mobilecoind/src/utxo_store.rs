@@ -257,27 +257,36 @@ impl UtxoStore {
             // match the list of key images. Keep track of which ones were successfully
             // removed so that we could clear their utxo data and return them to the caller.
             let mut cursor = db_txn.open_rw_cursor(self.subaddress_id_to_utxo_id)?;
-            match cursor.iter_dup_of(&subaddress_id.to_vec()) {
-                Ok(iterator) => {
-                    for (_subaddress_id_bytes, utxo_id_bytes) in iterator {
-                        // Remember: The utxo id bytes are equal to the KeyImage
-                        if key_images.contains(&utxo_id_bytes) {
-                            // utxo ids and key images are interchangeable so this is not expected to
-                            // fail.
-                            // Note that it is critical to read `utxo_id_bytes` BEFORE deleting due to
-                            // this bug: https://github.com/danburkert/lmdb-rs/issues/57
-                            removed_key_images.push(KeyImage::try_from(utxo_id_bytes).unwrap());
+            let _ = cursor
+                .iter_dup_of(&subaddress_id.to_vec())
+                .map(|result| {
+                    result
+                        .map_err(Error::from)
+                        .and_then(|(subaddress_id_bytes, utxo_id_bytes)| {
+                            // Workaround a bug in lmdb-rkv - even though we are interating over
+                            // `subaddress_id`, we will sometimes receive items that have a different
+                            // key.
+                            // This seems to be resolved by https://github.com/mozilla/lmdb-rs/pull/80
+                            // but it hadn't gotten merged yet :(
+                            if subaddress_id_bytes != &subaddress_id.to_vec()[..] {
+                                return Ok(());
+                            }
 
-                            cursor.del(WriteFlags::empty())?;
-                        }
-                    }
+                            // Remember: The utxo id bytes are equal to the KeyImage
+                            if key_images.contains(&utxo_id_bytes) {
+                                // utxo ids and key images are interchangeable so this is not expected to
+                                // fail.
+                                // Note that it is critical to read `utxo_id_bytes` BEFORE deleting due to
+                                // this bug: https://github.com/danburkert/lmdb-rs/issues/57
+                                removed_key_images.push(KeyImage::try_from(utxo_id_bytes).unwrap());
 
-                    Ok(())
-                }
-                Err(lmdb::Error::NotFound) => Ok(()),
-                Err(err) => Err(Error::LMDB(err)),
-            }?;
-            drop(cursor);
+                                cursor.del(WriteFlags::empty())?;
+                            }
+
+                            Ok(())
+                        })
+                })
+                .collect::<Result<Vec<()>, Error>>()?;
         }
 
         // Remove the actual UnspentTxOut data for every key image we successfully removed.
@@ -369,18 +378,29 @@ impl UtxoStore {
         subaddress_id: &SubaddressId,
     ) -> Result<Vec<UtxoId>, Error> {
         let mut cursor = db_txn.open_ro_cursor(self.subaddress_id_to_utxo_id)?;
-        match cursor.iter_dup_of(&subaddress_id.to_vec()) {
-            Ok(iter) => {
-                let mut results = Vec::new();
-                for (_subaddress_id_bytes, utxo_id_bytes) in iter {
-                    let utxo_id = UtxoId::try_from(utxo_id_bytes)?;
-                    results.push(utxo_id);
-                }
-                Ok(results)
-            }
-            Err(lmdb::Error::NotFound) => Ok(vec![]),
-            Err(err) => Err(err.into()),
-        }
+        Ok(cursor
+            .iter_dup_of(&subaddress_id.to_vec())
+            .map(|result| {
+                result
+                    .map_err(Error::from)
+                    .and_then(|(subaddress_id_bytes, utxo_id_bytes)| {
+                        // Workaround a bug in lmdb-rkv - even though we are interating over
+                        // `subaddress_id`, we will sometimes receive items that have a different
+                        // key.
+                        // This seems to be resolved by https://github.com/mozilla/lmdb-rs/pull/80
+                        // but it hadn't gotten merged yet :(
+                        if subaddress_id.to_vec() == subaddress_id_bytes {
+                            Ok(Some(UtxoId::try_from(utxo_id_bytes)?))
+                        } else {
+                            Ok(None)
+                        }
+                    })
+            })
+            .collect::<Result<Vec<_>, Error>>()?
+            // Vec<Option<_>> => Vec<_> (getting rid of None values)
+            .into_iter()
+            .filter_map(|x| x)
+            .collect())
     }
 
     /// Get a single UnspentTxOut by its id.
@@ -573,6 +593,23 @@ mod test {
 
                 let mut utxo = utxos[2].clone();
                 utxo.subaddress_index = subaddress1_1.index;
+                println!("------------------ 1");
+
+                {
+                    println!("BEFORE");
+                    let mut cursor = db_txn
+                        .open_ro_cursor(utxo_store.subaddress_id_to_utxo_id)
+                        .unwrap();
+                    for (subaddress_id_bytes, utxo_id_bytes) in
+                        cursor.iter().map(lmdb::Result::unwrap)
+                    {
+                        println!(
+                            "{:?} {}",
+                            SubaddressId::try_from(subaddress_id_bytes).unwrap(),
+                            UtxoId::try_from(utxo_id_bytes).unwrap(),
+                        );
+                    }
+                }
 
                 utxo_store
                     .append_utxo(
@@ -583,21 +620,43 @@ mod test {
                     )
                     .unwrap();
 
+                {
+                    println!("AFTER");
+                    let mut cursor = db_txn
+                        .open_ro_cursor(utxo_store.subaddress_id_to_utxo_id)
+                        .unwrap();
+                    for (subaddress_id_bytes, utxo_id_bytes) in
+                        cursor.iter().map(lmdb::Result::unwrap)
+                    {
+                        println!(
+                            "{:?} {}",
+                            SubaddressId::try_from(subaddress_id_bytes).unwrap(),
+                            UtxoId::try_from(utxo_id_bytes).unwrap(),
+                        );
+                    }
+                }
+
+                println!("{:?}", utxo_ids);
+                println!("------------------ 2");
+
                 // Verify we can read the expected ids for each of our four subaddresses.
                 assert_eq!(
                     HashSet::from_iter(vec![utxo_ids[0], utxo_ids[1]]),
                     HashSet::from_iter(utxo_store.get_utxo_ids(&db_txn, &subaddress0_0).unwrap()),
                 );
+                println!("------------------ 3");
 
                 assert_eq!(
                     utxo_store.get_utxo_ids(&db_txn, &subaddress0_1).unwrap(),
                     vec![],
                 );
+                println!("------------------ 4");
 
                 assert_eq!(
                     utxo_store.get_utxo_ids(&db_txn, &subaddress1_0).unwrap(),
                     vec![],
                 );
+                println!("------------------ 5");
 
                 assert_eq!(
                     utxo_store.get_utxo_ids(&db_txn, &subaddress1_1).unwrap(),

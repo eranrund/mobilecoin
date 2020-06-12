@@ -74,8 +74,8 @@ impl WatcherDB {
             let mut cursor = db_txn.open_ro_cursor(last_synced)?;
             cursor
                 .iter()
-                .map(|(k, _v)| decode(k).expect("Could not decode url"))
-                .collect()
+                .map(|result| result.map(|(k, _v)| decode(k).expect("Could not decode url")))
+                .collect::<Result<HashSet<_>, lmdb::Error>>()?
         };
 
         let mut db_txn = env.begin_rw_txn()?;
@@ -177,35 +177,53 @@ impl WatcherDB {
             block_index
         );
 
-        match cursor.iter_dup_of(&key_bytes) {
-            Ok(iter) => {
-                let mut results: Vec<BlockSignatureData> = Vec::new();
-                for (_key_bytes, value_bytes) in iter {
-                    let signature_data: BlockSignatureData = decode(value_bytes)?;
-                    log::trace!(
-                        self.logger,
-                        "Got block signatures for {:?} ({:?})",
-                        block_index,
-                        signature_data,
-                    );
-                    results.push(signature_data);
-                }
-                Ok(results)
-            }
-            Err(lmdb::Error::NotFound) => Ok(Vec::new()),
-            Err(err) => Err(err.into()),
-        }
+        let results: Vec<BlockSignatureData> = cursor
+            .iter_dup_of(&key_bytes)
+            .map(|result| {
+                result
+                    .map_err(WatcherDBError::from)
+                    .and_then(|(key_bytes2, value_bytes)| {
+                        // Workaround a bug in lmdb-rkv - even though we are interating over
+                        // `subaddress_id`, we will sometimes receive items that have a different
+                        // key.
+                        // This seems to be resolved by https://github.com/mozilla/lmdb-rs/pull/80
+                        // but it hadn't gotten merged yet :(
+                        if key_bytes != key_bytes2 {
+                            return Ok(None);
+                        }
+
+                        let signature_data: BlockSignatureData = decode(value_bytes)?;
+                        log::trace!(
+                            self.logger,
+                            "Got block signatures for {:?} ({:?})",
+                            block_index,
+                            signature_data,
+                        );
+                        Ok(Some(signature_data))
+                    })
+            })
+            .collect::<Result<Vec<_>, WatcherDBError>>()?
+            // Vec<Option<_>> => Vec<_> (getting rid of None values)
+            .into_iter()
+            .filter_map(|x| x)
+            .collect();
+
+        Ok(results)
     }
 
     /// Get the total number of Blocks in the watcher db.
     pub fn last_synced_blocks(&self) -> Result<HashMap<String, u64>, WatcherDBError> {
         let db_txn = self.env.begin_ro_txn()?;
         let mut cursor = db_txn.open_ro_cursor(self.last_synced)?;
-        let mut results: HashMap<String, u64> = HashMap::default();
-        for (db_key, db_value) in cursor.iter() {
-            results.insert(decode(&db_key)?, decode(&db_value)?);
-        }
-        Ok(results)
+
+        Ok(cursor
+            .iter()
+            .map(|result| {
+                result
+                    .map_err(WatcherDBError::from)
+                    .and_then(|(db_key, db_value)| Ok((decode(&db_key)?, decode(&db_value)?)))
+            })
+            .collect::<Result<HashMap<_, _>, WatcherDBError>>()?)
     }
 
     /// In the case where a synced block did not have a signature, update last synced.
