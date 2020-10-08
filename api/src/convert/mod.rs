@@ -73,6 +73,18 @@ pub fn block_num_to_s3block_path(block_index: mc_transaction_core::BlockIndex) -
     path
 }
 
+/// Helper method for getting the suggested path/filename for a merged block (an object containing
+/// a consecutive collection of blocks), for a given block index and bucket size.
+pub fn merged_block_num_to_s3block_path(
+    bucket_size: usize,
+    block_index: mc_transaction_core::BlockIndex,
+) -> PathBuf {
+    let mut path = PathBuf::new();
+    path.push(format!("merged-{}", bucket_size));
+    path.push(block_num_to_s3block_path(block_index));
+    path
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

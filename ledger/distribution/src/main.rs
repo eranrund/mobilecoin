@@ -6,24 +6,53 @@
 pub mod uri;
 
 use crate::uri::{Destination, Uri};
-use mc_api::{block_num_to_s3block_path, blockchain};
+use mc_api::{block_num_to_s3block_path, blockchain, merged_block_num_to_s3block_path};
 use mc_common::logger::{create_app_logger, log, o, Logger};
 use mc_ledger_db::{Error as LedgerDbError, Ledger, LedgerDB};
 use mc_transaction_core::{Block, BlockContents, BlockIndex, BlockSignature};
-use protobuf::Message;
+use protobuf::{Message, RepeatedField};
 use rusoto_core::{Region, RusotoError};
 use rusoto_s3::{PutObjectError, PutObjectRequest, S3Client, S3};
 use serde::{Deserialize, Serialize};
 use std::{fs, path::PathBuf, str::FromStr};
 use structopt::StructOpt;
 
-pub trait BlockHandler {
-    fn handle_block(
+/// Bucket sizes for producing merged archived blocks (files that store multiple consecutive blocks).
+pub const MERGE_BUCKET_SIZES: &[usize] = &[10000];
+//pub const MERGE_BUCKET_SIZES: &[usize] = &[100, 1000];
+
+fn create_archive_block(
+    block: &Block,
+    block_contents: &BlockContents,
+    signature: &Option<BlockSignature>,
+) -> blockchain::ArchiveBlock {
+    let bc_block = blockchain::Block::from(block);
+    let bc_block_contents = blockchain::BlockContents::from(block_contents);
+
+    let mut archive_block_v1 = blockchain::ArchiveBlockV1::new();
+    archive_block_v1.set_block(bc_block);
+    archive_block_v1.set_block_contents(bc_block_contents);
+
+    if let Some(signature) = signature {
+        let bc_signature = blockchain::BlockSignature::from(signature);
+        archive_block_v1.set_signature(bc_signature);
+    }
+
+    let mut archive_block = blockchain::ArchiveBlock::new();
+    archive_block.set_v1(archive_block_v1);
+
+    archive_block
+}
+
+pub trait BlockWriter {
+    fn write_single_block(
         &mut self,
         block: &Block,
         block_contents: &BlockContents,
         signature: &Option<BlockSignature>,
     );
+
+    fn write_multiple_blocks(&mut self, blocks: &[(Block, BlockContents, Option<BlockSignature>)]);
 }
 
 /// Block to start syncing from.
@@ -141,29 +170,16 @@ impl S3BlockWriter {
     }
 }
 
-impl BlockHandler for S3BlockWriter {
-    fn handle_block(
+impl BlockWriter for S3BlockWriter {
+    fn write_single_block(
         &mut self,
         block: &Block,
         block_contents: &BlockContents,
         signature: &Option<BlockSignature>,
     ) {
-        log::info!(self.logger, "S3: Handling block {}", block.index);
+        log::info!(self.logger, "S3: Writing block {}", block.index);
 
-        let bc_block = blockchain::Block::from(block);
-        let bc_block_contents = blockchain::BlockContents::from(block_contents);
-
-        let mut archive_block_v1 = blockchain::ArchiveBlockV1::new();
-        archive_block_v1.set_block(bc_block);
-        archive_block_v1.set_block_contents(bc_block_contents);
-
-        if let Some(signature) = signature {
-            let bc_signature = blockchain::BlockSignature::from(signature);
-            archive_block_v1.set_signature(bc_signature);
-        }
-
-        let mut archive_block = blockchain::ArchiveBlock::new();
-        archive_block.set_v1(archive_block_v1);
+        let archive_block = create_archive_block(block, block_contents, signature);
 
         let dest = self
             .path
@@ -181,6 +197,47 @@ impl BlockHandler for S3BlockWriter {
                 .expect("failed to serialize ArchiveBlock"),
         );
     }
+
+    fn write_multiple_blocks(&mut self, blocks: &[(Block, BlockContents, Option<BlockSignature>)]) {
+        let num_blocks = blocks.len() as u64;
+        assert!(num_blocks > 1);
+
+        // Sanity: blocks must be consecutive
+        for i in 1..num_blocks as usize {
+            assert_eq!(blocks[i].0.index, blocks[i - 1].0.index + 1);
+        }
+
+        log::info!(
+            self.logger,
+            "Local: Writing blocks {}-{}",
+            blocks[0].0.index,
+            blocks[0].0.index + num_blocks
+        );
+
+        let mut archive_blocks = blockchain::ArchiveBlocks::new();
+        archive_blocks.set_blocks(RepeatedField::from_vec(
+            blocks
+                .into_iter()
+                .map(|(block, block_contents, signature)| {
+                    create_archive_block(block, block_contents, signature)
+                })
+                .collect(),
+        ));
+
+        let bytes = archive_blocks
+            .write_to_bytes()
+            .expect("failed to serialize ArchiveBlocks");
+
+        let dest = self.path.as_path().join(merged_block_num_to_s3block_path(
+            blocks.len(),
+            blocks[0].0.index,
+        ));
+
+        let dir = dest.as_path().parent().expect("failed getting parent");
+        let filename = dest.file_name().unwrap();
+
+        self.write_bytes_to_s3(dir.to_str().unwrap(), filename.to_str().unwrap(), &bytes);
+    }
 }
 
 /// Local directory block writer.
@@ -197,29 +254,16 @@ impl LocalBlockWriter {
     }
 }
 
-impl BlockHandler for LocalBlockWriter {
-    fn handle_block(
+impl BlockWriter for LocalBlockWriter {
+    fn write_single_block(
         &mut self,
         block: &Block,
         block_contents: &BlockContents,
         signature: &Option<BlockSignature>,
     ) {
-        log::info!(self.logger, "S3: Handling block {}", block.index);
+        log::info!(self.logger, "Local: Writing block {}", block.index);
 
-        let bc_block = blockchain::Block::from(block);
-        let bc_block_contents = blockchain::BlockContents::from(block_contents);
-
-        let mut archive_block_v1 = blockchain::ArchiveBlockV1::new();
-        archive_block_v1.set_block(bc_block);
-        archive_block_v1.set_block_contents(bc_block_contents);
-
-        if let Some(signature) = signature {
-            let bc_signature = blockchain::BlockSignature::from(signature);
-            archive_block_v1.set_signature(bc_signature);
-        }
-
-        let mut archive_block = blockchain::ArchiveBlock::new();
-        archive_block.set_v1(archive_block_v1);
+        let archive_block = create_archive_block(block, block_contents, signature);
 
         let bytes = archive_block
             .write_to_bytes()
@@ -235,6 +279,55 @@ impl BlockHandler for LocalBlockWriter {
             .unwrap_or_else(|e| panic!("failed creating directory {:?}: {:?}", dir, e));
         fs::write(&dest, bytes)
             .unwrap_or_else(|_| panic!("failed writing block #{} to {:?}", block.index, dest));
+    }
+
+    fn write_multiple_blocks(&mut self, blocks: &[(Block, BlockContents, Option<BlockSignature>)]) {
+        let num_blocks = blocks.len() as u64;
+        assert!(num_blocks > 1);
+
+        // Sanity: blocks must be consecutive
+        for i in 1..num_blocks as usize {
+            assert_eq!(blocks[i].0.index, blocks[i - 1].0.index + 1);
+        }
+
+        log::info!(
+            self.logger,
+            "Local: Writing blocks {}-{}",
+            blocks[0].0.index,
+            blocks[0].0.index + num_blocks
+        );
+
+        let mut archive_blocks = blockchain::ArchiveBlocks::new();
+        archive_blocks.set_blocks(RepeatedField::from_vec(
+            blocks
+                .into_iter()
+                .map(|(block, block_contents, signature)| {
+                    create_archive_block(block, block_contents, signature)
+                })
+                .collect(),
+        ));
+
+        let bytes = archive_blocks
+            .write_to_bytes()
+            .expect("failed to serialize ArchiveBlocks");
+
+        let dest = self
+            .path
+            .as_path()
+            .join(format!("merged-{}", blocks.len()))
+            .join(block_num_to_s3block_path(blocks[0].0.index));
+        let dir = dest.as_path().parent().expect("failed getting parent");
+
+        fs::create_dir_all(dir)
+            .unwrap_or_else(|e| panic!("failed creating directory {:?}: {:?}", dir, e));
+        fs::write(&dest, bytes).unwrap_or_else(|_| {
+            panic!(
+                "failed writing blocks #{}-#{} to {:?}",
+                blocks[0].0.index,
+                blocks[0].0.index + num_blocks,
+                dest
+            )
+        });
     }
 }
 
@@ -281,8 +374,8 @@ fn main() {
             .expect("Failed getting number of blocks in ledger"),
     };
 
-    // Create block handler
-    let mut block_handler: Box<dyn BlockHandler> = match config.destination.destination {
+    // Create block writer
+    let mut block_writer: Box<dyn BlockWriter> = match config.destination.destination {
         Destination::S3 { path, region } => {
             Box::new(S3BlockWriter::new(path, region, logger.clone()))
         }
@@ -303,13 +396,13 @@ fn main() {
     );
     let mut next_block_num = first_desired_block;
     loop {
-        while let (Ok(block_contents), Ok(block)) = (
+        while let (Ok(_block_contents), Ok(block)) = (
             ledger_db.get_block_contents(next_block_num),
             ledger_db.get_block(next_block_num),
         ) {
-            log::trace!(logger, "Handling block #{}", next_block_num);
+            log::trace!(logger, "Writing block #{}", next_block_num);
 
-            let signature = match ledger_db.get_block_signature(next_block_num) {
+            let _signature = match ledger_db.get_block_signature(next_block_num) {
                 Ok(signature) => Some(signature),
                 Err(LedgerDbError::NotFound) => None,
                 Err(err) => {
@@ -323,7 +416,54 @@ fn main() {
                 }
             };
 
-            block_handler.handle_block(&block, &block_contents, &signature);
+            // block_writer.write_single_block(&block, &block_contents, &signature);
+
+            for bucket_size in MERGE_BUCKET_SIZES {
+                if (block.index as usize + 1) % bucket_size != 0 {
+                    continue;
+                }
+
+                let first_block_index = block.index + 1 - *bucket_size as u64;
+                let last_block_index = block.index;
+
+                log::debug!(
+                    logger,
+                    "Preparing to write merged block #{}-{}",
+                    first_block_index,
+                    last_block_index
+                );
+
+                let mut blocks_data = Vec::new();
+                for block_index in first_block_index..=last_block_index {
+                    // We panic here since this block and its associated data is expected to be in the ledger
+                    // due to block_index < next_block_num (which we successfully fetched or otherwise
+                    // this code wouldn't be running).
+                    let block = ledger_db.get_block(block_index).unwrap_or_else(|err| {
+                        panic!("failed getting block #{}: {}", block_index, err)
+                    });
+                    let block_contents =
+                        ledger_db
+                            .get_block_contents(block_index)
+                            .unwrap_or_else(|err| {
+                                panic!("failed getting block contents #{}: {}", block_index, err)
+                            });
+                    let block_signature = match ledger_db.get_block_signature(next_block_num) {
+                        Ok(signature) => Some(signature),
+                        Err(LedgerDbError::NotFound) => None,
+                        Err(err) => {
+                            panic!(
+                                "Failed getting signature for block #{}: {:?}",
+                                block_index, err
+                            );
+                        }
+                    };
+
+                    blocks_data.push((block, block_contents, block_signature));
+                }
+
+                block_writer.write_multiple_blocks(&blocks_data);
+            }
+
             next_block_num += 1;
 
             let state = StateData {
