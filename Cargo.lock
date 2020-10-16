@@ -4061,13 +4061,12 @@ checksum = "19b17cddbe7ec3f8bc800887bab5e717348c95ea2ca0b1bf0837fb964dc67099"
 
 [[package]]
 name = "pem"
-version = "0.6.1"
+version = "0.8.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "39eb474073dfddbf7156515344266245d91ce698ddbf15e0498cef22b836f45a"
+checksum = "59698ea79df9bf77104aefd39cc3ec990cb9693fb59c3b0a70ddf2646fdffb4b"
 dependencies = [
- "base64 0.10.1",
- "failure",
- "lazy_static",
+ "base64 0.12.1",
+ "once_cell",
  "regex",
 ]
 
