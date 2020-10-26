@@ -1201,9 +1201,9 @@ checksum = "1b980f2816d6ee8673b6517b52cb0e808a180efc92e5c19d02cdda79066703ef"
 
 [[package]]
 name = "futures"
-version = "0.3.5"
+version = "0.3.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1e05b85ec287aac0dc34db7d4a569323df697f9c55b99b15d6b4ef8cde49f613"
+checksum = "95314d38584ffbfda215621d723e0a3906f032e03ae5551e650058dac83d4797"
 dependencies = [
  "futures-channel",
  "futures-core",
@@ -1216,9 +1216,9 @@ dependencies = [
 
 [[package]]
 name = "futures-channel"
-version = "0.3.5"
+version = "0.3.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f366ad74c28cca6ba456d95e6422883cfb4b252a83bed929c83abfdbbf2967d5"
+checksum = "0448174b01148032eed37ac4aed28963aaaa8cfa93569a08e5b479bbc6c2c151"
 dependencies = [
  "futures-core",
  "futures-sink",
@@ -1226,9 +1226,9 @@ dependencies = [
 
 [[package]]
 name = "futures-core"
-version = "0.3.5"
+version = "0.3.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "59f5fff90fd5d971f936ad674802482ba441b6f09ba5e15fd8b39145582ca399"
+checksum = "18eaa56102984bed2c88ea39026cff3ce3b4c7f508ca970cedf2450ea10d4e46"
 
 [[package]]
 name = "futures-cpupool"
@@ -1242,9 +1242,9 @@ dependencies = [
 
 [[package]]
 name = "futures-executor"
-version = "0.3.5"
+version = "0.3.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "10d6bb888be1153d3abeb9006b11b02cf5e9b209fda28693c31ae1e4e012e314"
+checksum = "f5f8e0c9258abaea85e78ebdda17ef9666d390e987f006be6080dfe354b708cb"
 dependencies = [
  "futures-core",
  "futures-task",
@@ -1253,15 +1253,15 @@ dependencies = [
 
 [[package]]
 name = "futures-io"
-version = "0.3.5"
+version = "0.3.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "de27142b013a8e869c14957e6d2edeef89e97c289e69d042ee3a49acd8b51789"
+checksum = "6e1798854a4727ff944a7b12aa999f58ce7aa81db80d2dfaaf2ba06f065ddd2b"
 
 [[package]]
 name = "futures-macro"
-version = "0.3.5"
+version = "0.3.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d0b5a30a4328ab5473878237c447333c093297bded83a4983d10f4deea240d39"
+checksum = "e36fccf3fc58563b4a14d265027c627c3b665d7fed489427e88e7cc929559efe"
 dependencies = [
  "proc-macro-hack",
  "proc-macro2 1.0.24",
@@ -1271,24 +1271,24 @@ dependencies = [
 
 [[package]]
 name = "futures-sink"
-version = "0.3.5"
+version = "0.3.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3f2032893cb734c7a05d85ce0cc8b8c4075278e93b24b66f9de99d6eb0fa8acc"
+checksum = "0e3ca3f17d6e8804ae5d3df7a7d35b2b3a6fe89dac84b31872720fc3060a0b11"
 
 [[package]]
 name = "futures-task"
-version = "0.3.5"
+version = "0.3.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bdb66b5f09e22019b1ab0830f7785bcea8e7a42148683f99214f73f8ec21a626"
+checksum = "96d502af37186c4fef99453df03e374683f8a1eec9dcc1e66b3b82dc8278ce3c"
 dependencies = [
  "once_cell",
 ]
 
 [[package]]
 name = "futures-util"
-version = "0.3.5"
+version = "0.3.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8764574ff08b701a084482c3c7031349104b07ac897393010494beaa18ce32c6"
+checksum = "abcb44342f62e6f3e8ac427b8aa815f724fd705dfad060b18ac7866c15bb8e34"
 dependencies = [
  "futures-channel",
  "futures-core",
@@ -1297,7 +1297,7 @@ dependencies = [
  "futures-sink",
  "futures-task",
  "memchr",
- "pin-project",
+ "pin-project 1.0.1",
  "pin-utils",
  "proc-macro-hack",
  "proc-macro-nested",
@@ -1370,7 +1370,7 @@ name = "grpcio"
 version = "0.6.0"
 source = "git+https://github.com/jcape/grpc-rs?rev=74797d973f0e81555c3c01857ccdbb8092f21f67#74797d973f0e81555c3c01857ccdbb8092f21f67"
 dependencies = [
- "futures 0.3.5",
+ "futures 0.3.7",
  "grpcio-sys",
  "libc",
  "log 0.4.8",
@@ -1688,7 +1688,7 @@ dependencies = [
  "itoa",
  "log 0.4.8",
  "net2",
- "pin-project",
+ "pin-project 0.4.10",
  "time",
  "tokio 0.2.20",
  "tower-service",
@@ -2130,7 +2130,7 @@ dependencies = [
  "aead",
  "cargo-emit",
  "digest 0.9.0",
- "futures 0.3.5",
+ "futures 0.3.7",
  "grpcio",
  "mc-attest-ake",
  "mc-attest-enclave-api",
@@ -2311,7 +2311,7 @@ name = "mc-consensus-api"
 version = "1.0.0"
 dependencies = [
  "cargo-emit",
- "futures 0.3.5",
+ "futures 0.3.7",
  "grpcio",
  "mc-api",
  "mc-attest-api",
@@ -2495,7 +2495,7 @@ dependencies = [
  "curve25519-dalek",
  "displaydoc",
  "fs_extra",
- "futures 0.3.5",
+ "futures 0.3.7",
  "grpcio",
  "hex 0.4.2",
  "lazy_static",
@@ -2756,7 +2756,7 @@ name = "mc-fog-api"
 version = "1.0.0"
 dependencies = [
  "cargo-emit",
- "futures 0.3.5",
+ "futures 0.3.7",
  "grpcio",
  "mc-api",
  "mc-attest-api",
@@ -2908,7 +2908,7 @@ version = "1.0.0"
 dependencies = [
  "crossbeam-channel",
  "failure",
- "futures 0.3.5",
+ "futures 0.3.7",
  "grpcio",
  "hex_fmt",
  "libz-sys",
@@ -2960,7 +2960,7 @@ name = "mc-mobilecoind-api"
 version = "1.0.0"
 dependencies = [
  "cargo-emit",
- "futures 0.3.5",
+ "futures 0.3.7",
  "grpcio",
  "hex_fmt",
  "mc-api",
@@ -3524,7 +3524,7 @@ dependencies = [
  "base64 0.12.1",
  "digest 0.9.0",
  "displaydoc",
- "futures 0.3.5",
+ "futures 0.3.7",
  "grpcio",
  "hex 0.4.2",
  "hex_fmt",
@@ -4137,7 +4137,16 @@ version = "0.4.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "36e3dcd42688c05a66f841d22c5d8390d9a5d4c9aaf57b9285eae4900a080063"
 dependencies = [
- "pin-project-internal",
+ "pin-project-internal 0.4.10",
+]
+
+[[package]]
+name = "pin-project"
+version = "1.0.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ee41d838744f60d959d7074e3afb6b35c7456d0f61cad38a24e35e6553f73841"
+dependencies = [
+ "pin-project-internal 1.0.1",
 ]
 
 [[package]]
@@ -4145,6 +4154,17 @@ name = "pin-project-internal"
 version = "0.4.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f4d7346ac577ff1296e06a418e7618e22655bae834d4970cb6e39d6da8119969"
+dependencies = [
+ "proc-macro2 1.0.24",
+ "quote 1.0.4",
+ "syn 1.0.45",
+]
+
+[[package]]
+name = "pin-project-internal"
+version = "1.0.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "81a4ffa594b66bff340084d4081df649a7dc049ac8d7fc458d8e628bfbbb2f86"
 dependencies = [
  "proc-macro2 1.0.24",
  "quote 1.0.4",
