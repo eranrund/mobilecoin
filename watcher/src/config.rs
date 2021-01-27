@@ -28,6 +28,10 @@ pub struct WatcherConfig {
     /// (Optional) Number of blocks to sync
     #[structopt(long)]
     pub max_block_height: Option<u64>,
+
+    /// Store block data for every fetched block.
+    #[structopt(long)]
+    pub store_block_data: bool,
 }
 
 impl WatcherConfig {
