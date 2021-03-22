@@ -1457,11 +1457,10 @@ checksum = "f36b5f248235f45773d4944f555f83ea61fe07b18b561ccf99d7483d7381e54d"
 
 [[package]]
 name = "hashbrown"
-version = "0.6.3"
+version = "0.11.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8e6073d0ca812575946eb5f35ff68dbe519907b25c42530389ff946dc84c6ead"
+checksum = "a3de7a9a685bb301f5cb29587f13833270c59e7d2c6f457a66372996afad4504"
 dependencies = [
- "autocfg 0.1.7",
  "serde",
 ]
 
