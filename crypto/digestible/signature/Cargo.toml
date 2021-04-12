@@ -12,4 +12,4 @@ mc-crypto-digestible = { path = ".." }
 signature = { version = "1.2", default-features = false }
 
 # Overridden since we need a not-yet-released commit that uprevs a bunch of dependencies.
-schnorrkel = { git = "https://github.com/w3f/schnorrkel", rev = "cfdbe9ae865a4d3ffa2566d896d4dbedf5107028", default-features = false }
+schnorrkel = { git = "https://github.com/w3f/schnorrkel", rev = "34cdb371c14a73cbe86dfd613ff67d61662b4434", default-features = false }

@@ -82,6 +82,8 @@ macro_rules! impl_ffi_wrapper_base {
             }
         }
 
+        // TODO can this be impl From?
+        #[allow(clippy::from_over_into)]
         impl Into<$inner> for $wrapper {
             fn into(self) -> $inner {
                 self.0

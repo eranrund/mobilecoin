@@ -154,3 +154,12 @@ cpuid-bool = { git = "https://github.com/eranrund/RustCrypto-utils", rev = "74f8
 
 # We need to patch aes-gcm so we can make some fields/functions/structs pub in order to have a constant time decrypt
 aes-gcm = { git = "https://github.com/mobilecoinofficial/AEADs", rev = "d1a8517d3dd867ed9c5794002add67992a42f6aa" }
+
+# ed25519-dalek depends on rand 0.7 which in turns depends on a broken version of packed_simd
+# This is a PR that moves it to newer rand
+# TODO if moving forward, this must be forked into a repo we control
+ed25519-dalek = { git = "https://github.com/bltavares/ed25519-dalek.git", rev = "5e6c936" }
+
+# See https://github.com/commure/datatest/pull/30
+# TODO fork to our org
+datatest = { git = "https://github.com/cormacrelf/datatest.git", rev = "0c12efa" }
