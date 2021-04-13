@@ -30,7 +30,7 @@ use std::{
 };
 use url::Url;
 
-/// LMDB Constant.
+/// Lmdb Constant.
 const MAX_LMDB_FILE_SIZE: usize = 1_099_511_627_776; // 1 TB
 
 /// Metadata store settings that are used for version control.
@@ -47,7 +47,7 @@ impl MetadataStoreSettings for WatcherDbMetadataStoreSettings {
     /// The current crate version that manages the database.
     const CRATE_VERSION: &'static str = env!("CARGO_PKG_VERSION");
 
-    /// LMDB Database name to use for storing the metadata information.
+    /// Lmdb Database name to use for storing the metadata information.
     const DB_NAME: &'static str = "watcher_db_metadata";
 }
 
@@ -93,7 +93,7 @@ pub struct BlockSignatureData {
 #[derive(Clone)]
 /// DB for Watcher Node.
 pub struct WatcherDB {
-    /// LMDB Environment (database).
+    /// Lmdb Environment (database).
     env: Arc<Environment>,
 
     /// BlockData store.
@@ -105,7 +105,7 @@ pub struct WatcherDB {
     /// Verification reports by block signer (and tx source url) database.
     /// This actually points to report hashes, which then allow getting the
     /// actual report contents from the verification_reports_by_hash
-    /// database. This is needed because LMDB limits the value size in
+    /// database. This is needed because Lmdb limits the value size in
     /// DUP_SORT databases to 511 bytes, not enough to fit the report. This
     /// database needs to be DUP_SORT since we want to support the
     /// odd case of different reports showing up for the same signer/url pair.

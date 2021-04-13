@@ -55,7 +55,7 @@ impl FromStr for StartFrom {
     about = "The MobileCoin Ledger Distribution Service."
 )]
 pub struct Config {
-    /// Path to local LMDB db file.
+    /// Path to local Lmdb db file.
     #[structopt(long, parse(from_os_str))]
     pub ledger_path: PathBuf,
 

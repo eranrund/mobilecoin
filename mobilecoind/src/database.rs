@@ -21,7 +21,7 @@ use mc_transaction_core::ring_signature::KeyImage;
 use mc_util_lmdb::{MetadataStore, MetadataStoreSettings};
 use std::{path::Path, sync::Arc};
 
-// LMDB Constants
+// Lmdb Constants
 const MAX_LMDB_FILE_SIZE: usize = 1_099_511_627_776; // 1 TB
 
 /// Metadata store settings that are used for version control.
@@ -38,14 +38,14 @@ impl MetadataStoreSettings for MobilecoindDbMetadataStoreSettings {
     /// The current crate version that manages the database.
     const CRATE_VERSION: &'static str = env!("CARGO_PKG_VERSION");
 
-    /// LMDB Database name to use for storing the metadata information.
+    /// Lmdb Database name to use for storing the metadata information.
     const DB_NAME: &'static str = "mobilecoind_db_metadata";
 }
 
 /// The main mobilecoind database.
 #[derive(Clone)]
 pub struct Database {
-    // LMDB Environment (database).
+    // Lmdb Environment (database).
     env: Arc<Environment>,
 
     /// Crypto provider, used for managing database encryption.

@@ -32,7 +32,7 @@ fn main() {
     let _sentry_guard = mc_common::sentry::init();
     let (logger, _global_logger_guard) = create_app_logger(o!());
 
-    // Open the LMDB database.
+    // Open the Lmdb database.
     let env = Environment::new()
         .set_max_dbs(22)
         .set_map_size(MAX_LMDB_FILE_SIZE)

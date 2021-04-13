@@ -75,7 +75,7 @@ impl BlockDataStore {
         })
     }
 
-    /// Setup the required databases in the LMDB file.
+    /// Setup the required databases in the Lmdb file.
     pub fn create(env: Arc<Environment>) -> Result<(), WatcherDBError> {
         env.create_db(Some(BLOCK_DATAS_BY_INDEX_DB_NAME), DatabaseFlags::empty())?;
         env.create_db(Some(BLOCKS_BY_HASH_DB_NAME), DatabaseFlags::empty())?;

@@ -12,7 +12,7 @@ use mc_transaction_core::ring_signature::KeyImage;
 use prost::{Enumeration, Message};
 use std::{convert::TryFrom, sync::Arc};
 
-// LMDB Database Names
+// Lmdb Database Names
 pub const PROCESSED_BLOCK_KEY_TO_PROCESSED_TX_OUTS_DB_NAME: &str =
     "mobilecoind_db:processed_block_store:processed_block_key_to_processed_tx_outs";
 
@@ -130,7 +130,7 @@ impl ProcessedTxOut {
 /// the processed blocks database.
 #[derive(Clone)]
 pub struct ProcessedBlockStore {
-    /// LMDB Environment.
+    /// Lmdb Environment.
     env: Arc<Environment>,
 
     /// Mapping of ProcessedBlockKey -> [ProcessedTxOut].
@@ -166,7 +166,7 @@ impl ProcessedBlockStore {
         let key = ProcessedBlockKey::new(monitor_id, block_index);
         let key_bytes = key.to_vec();
 
-        Ok(cursor
+        cursor
             .iter_dup_of(&key_bytes)
             .map(|result| {
                 result.map_err(Error::from).and_then(|(db_key, db_value)| {
@@ -176,7 +176,7 @@ impl ProcessedBlockStore {
                     Ok(mc_util_serial::decode(db_value)?)
                 })
             })
-            .collect::<Result<Vec<_>, Error>>()?)
+            .collect::<Result<Vec<_>, Error>>()
     }
 
     /// Remove the data associated with a given monitor id.

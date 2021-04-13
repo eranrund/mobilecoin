@@ -1,6 +1,6 @@
 // Copyright (c) 2018-2021 The MobileCoin Foundation
 
-//! MetadataStore - an LMDB database that stores metadata about the database.
+//! MetadataStore - an Lmdb database that stores metadata about the database.
 //! Right now this is limited to versioning information.
 
 use displaydoc::Display;
@@ -14,7 +14,7 @@ use prost::Message;
 /// An error type.
 #[derive(Debug, Display, Eq, PartialEq, Copy, Clone)]
 pub enum MetadataStoreError {
-    /// LMDB Error: {0}
+    /// Lmdb Error: {0}
     Lmdb(LmdbError),
 
     /// Database version {0} is incompatible with {1}
@@ -56,7 +56,7 @@ pub trait MetadataStoreSettings: Default {
     /// The current crate version that manages the database.
     const CRATE_VERSION: &'static str;
 
-    /// LMDB Database name to use for storing the metadata information.
+    /// Lmdb Database name to use for storing the metadata information.
     const DB_NAME: &'static str;
 
     /// Check if a given version is compatible with the latest version.
@@ -77,7 +77,7 @@ pub trait MetadataStoreSettings: Default {
     }
 }
 
-/// Metadata information stored inside the LMDB database.
+/// Metadata information stored inside the Lmdb database.
 #[derive(Clone, Message)]
 struct StoredMetadataVersion {
     /// Database format version.

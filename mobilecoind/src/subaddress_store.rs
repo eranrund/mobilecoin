@@ -17,7 +17,7 @@ use mc_crypto_keys::RistrettoPublic;
 use prost::Message;
 use std::{convert::TryFrom, sync::Arc};
 
-// LMDB Database Names
+// Lmdb Database Names
 pub const SUBADDRESS_PUBLIC_SPEND_KEY_TO_INDEX_DATA_DB_NAME: &str =
     "mobilecoind_db:subaddress_store:spk_to_index_data";
 

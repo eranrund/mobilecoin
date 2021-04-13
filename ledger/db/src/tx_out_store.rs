@@ -33,7 +33,7 @@ use mc_transaction_core::{
 };
 use mc_util_serial::{decode, encode};
 
-// LMDB Database names.
+// Lmdb Database names.
 pub const COUNTS_DB_NAME: &str = "tx_out_store:counts";
 pub const TX_OUT_INDEX_BY_HASH_DB_NAME: &str = "tx_out_store:tx_out_index_by_hash";
 pub const TX_OUT_INDEX_BY_PUBLIC_KEY_DB_NAME: &str = "tx_out_store:tx_out_index_by_public_key";
@@ -245,7 +245,7 @@ impl TxOutStore {
     /// # Arguments
     /// * `index` - The index of a TxOut that has not yet been included in the
     ///   Merkle Tree.
-    /// * `db_transaction` - an LMDB transaction.
+    /// * `db_transaction` - an Lmdb transaction.
     ///
     /// Returns (the new Merkle root hash?) or an Error.
     fn update_merkle_hashes(
@@ -356,7 +356,7 @@ impl TxOutStore {
     }
 }
 
-/// Converts this Range to bytes for use as an LMDB key.
+/// Converts this Range to bytes for use as an Lmdb key.
 fn range_to_key_bytes(range: &Range) -> [u8; 16] {
     let mut bytes = [0u8; 16];
     bytes[0..8].copy_from_slice(&range.from.to_be_bytes());

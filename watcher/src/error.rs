@@ -70,7 +70,7 @@ pub enum WatcherDBError {
     /// Loading blocks out of order
     BlockOrder,
 
-    /// LMDB: {0}
+    /// Lmdb: {0}
     LmdbError(lmdb::Error),
 
     /// IO

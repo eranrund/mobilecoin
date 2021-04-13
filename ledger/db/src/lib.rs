@@ -40,7 +40,7 @@ pub use tx_out_store::TxOutStore;
 
 const MAX_LMDB_FILE_SIZE: usize = 1_099_511_627_776; // 1 TB
 
-// LMDB Database names.
+// Lmdb Database names.
 pub const COUNTS_DB_NAME: &str = "ledger_db:counts";
 pub const BLOCKS_DB_NAME: &str = "ledger_db:blocks";
 pub const BLOCK_SIGNATURES_DB_NAME: &str = "ledger_db:block_signatures";
@@ -66,7 +66,7 @@ impl MetadataStoreSettings for LedgerDbMetadataStoreSettings {
     /// The current crate version that manages the database.
     const CRATE_VERSION: &'static str = env!("CARGO_PKG_VERSION");
 
-    /// LMDB Database name to use for storing the metadata information.
+    /// Lmdb Database name to use for storing the metadata information.
     const DB_NAME: &'static str = "ledger_db_metadata";
 }
 
@@ -148,7 +148,7 @@ impl Ledger for LedgerDB {
     ) -> Result<(), Error> {
         let start_time = Instant::now();
 
-        // Note: This function must update every LMDB database managed by LedgerDB.
+        // Note: This function must update every Lmdb database managed by LedgerDB.
         let mut db_transaction = self.env.begin_rw_txn()?;
 
         // Validate the block is safe to append.
@@ -789,7 +789,7 @@ mod ledger_db_test {
     }
 
     #[test]
-    // Appending a block should correctly update each LMDB database.
+    // Appending a block should correctly update each Lmdb database.
     fn test_append_block() {
         let mut rng: StdRng = SeedableRng::from_seed([1u8; 32]);
         let mut ledger_db = create_db();

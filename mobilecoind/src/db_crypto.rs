@@ -25,7 +25,7 @@ pub const MOBILECOIND_DB_KEY_DOMAIN_TAG: &str = "mc_mobilecoind";
 /// hash of a password and not the actual password the user typed.
 pub const PASSWORD_LEN: usize = 32;
 
-/// LMDB database name for storing metadata.
+/// Lmdb database name for storing metadata.
 const CRYPTO_DB_NAME: &str = "db_crypto";
 
 /// Key/value used for testing we have the correct encryption key.
@@ -47,7 +47,7 @@ pub enum DbCryptoError {
     #[fail(display = "AEAD: {}", _0)]
     Aead(AeadError),
 
-    #[fail(display = "LMDB: {}", _0)]
+    #[fail(display = "Lmdb: {}", _0)]
     Lmdb(LmdbError),
 }
 
@@ -78,7 +78,7 @@ struct DbCryptoProviderState {
 /// Database encryption helper.
 #[derive(Clone)]
 pub struct DbCryptoProvider {
-    /// LMDB Environment (database).
+    /// Lmdb Environment (database).
     env: Arc<Environment>,
 
     /// Database used for testing whether we have the correct encryption key or
@@ -225,7 +225,7 @@ impl DbCryptoProvider {
 
             let cipher = Aes256Gcm::new(&key);
 
-            Ok(cipher.encrypt(&nonce, &plaintext_bytes[..])?)
+            Ok(cipher.encrypt(&nonce, plaintext_bytes)?)
         } else {
             Ok(plaintext_bytes.to_vec())
         }
@@ -254,7 +254,7 @@ impl DbCryptoProvider {
         let (key, nonce) = Self::expand_password(password)?;
 
         let cipher = Aes256Gcm::new(&key);
-        Ok(cipher.encrypt(&nonce, &plaintext_bytes[..])?)
+        Ok(cipher.encrypt(&nonce, plaintext_bytes)?)
     }
 
     /// Decrypt data with the currently set password.

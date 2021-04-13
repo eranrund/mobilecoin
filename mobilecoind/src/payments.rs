@@ -26,7 +26,7 @@ use rand::Rng;
 use std::{
     cmp::Reverse,
     convert::TryFrom,
-    iter::{empty, FromIterator},
+    iter::empty,
     str::FromStr,
     sync::{
         atomic::{AtomicUsize, Ordering},
@@ -632,7 +632,7 @@ impl<T: UserTxConnection + 'static, FPR: FogPubkeyResolver> TransactionsManager<
             let mut rng = rand::thread_rng();
             let mut samples: HashSet<u64> = HashSet::default();
             while samples.len() < num_requested {
-                let index = rng.gen_range(0, num_txos);
+                let index = rng.gen_range(0..num_txos);
                 if excluded_tx_out_indices.contains(&index) {
                     continue;
                 }
@@ -847,16 +847,17 @@ impl<T: UserTxConnection + 'static, FPR: FogPubkeyResolver> TransactionsManager<
             .map_err(|err| Error::TxBuildError(format!("build tx failed: {}", err)))?;
 
         // Map each TxOut in the constructed transaction to its respective outlay.
-        let outlay_index_to_tx_out_index =
-            HashMap::from_iter(tx.prefix.outputs.iter().enumerate().filter_map(
-                |(tx_out_index, tx_out)| {
-                    if let Some(outlay_index) = tx_out_to_outlay_index.get(tx_out) {
-                        Some((*outlay_index, tx_out_index))
-                    } else {
-                        None
-                    }
-                },
-            ));
+        let outlay_index_to_tx_out_index = tx
+            .prefix
+            .outputs
+            .iter()
+            .enumerate()
+            .filter_map(|(tx_out_index, tx_out)| {
+                tx_out_to_outlay_index
+                    .get(tx_out)
+                    .map(|outlay_index| (*outlay_index, tx_out_index))
+            })
+            .collect::<HashMap<_, _>>();
 
         // Sanity check: All of our outlays should have a unique index in the map.
         assert_eq!(outlay_index_to_tx_out_index.len(), destinations.len());

@@ -1,6 +1,6 @@
 // Copyright (c) 2018-2021 The MobileCoin Foundation
 
-//! LMDB utilities / common features.
+//! Lmdb utilities / common features.
 
 mod metadata_store;
 
