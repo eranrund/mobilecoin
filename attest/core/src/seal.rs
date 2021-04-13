@@ -55,6 +55,7 @@ pub trait Sealed: AsRef<IntelSealed> + Into<IntelSealed> {
 
     /// Rust does not let us implement Into<Vec<u8>> for all Sealed because of
     /// coherence issues
+    #[allow(clippy::wrong_self_convention)]
     fn to_bytes(self) -> Vec<u8> {
         <Self as Into<IntelSealed>>::into(self).into()
     }
@@ -92,6 +93,8 @@ macro_rules! impl_sealed_traits {
                 <Self as ::mc_attest_core::Sealed>::as_bytes(self)
             }
         }
+        // TODO
+        #[allow(clippy::from_over_into)]
         impl Into<::alloc::vec::Vec<u8>> for $sealed {
             fn into(self) -> ::alloc::vec::Vec<u8> {
                 <Self as ::mc_attest_core::Sealed>::to_bytes(self)
@@ -133,6 +136,8 @@ impl AsRef<[u8]> for IntelSealed {
     }
 }
 
+// TODO
+#[allow(clippy::from_over_into)]
 impl Into<Vec<u8>> for IntelSealed {
     fn into(self) -> Vec<u8> {
         self.payload

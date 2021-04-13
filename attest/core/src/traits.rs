@@ -206,6 +206,8 @@ macro_rules! impl_sgx_wrapper_reqs {
             }
         }
 
+        // TODO
+        #[allow(clippy::from_over_into)]
         impl Into<$inner> for $wrapper {
             fn into(self) -> $inner {
                 self.0

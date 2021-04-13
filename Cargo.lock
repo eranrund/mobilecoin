@@ -379,14 +379,14 @@ checksum = "39092a32794787acd8525ee150305ff051b0aa6cc2abaf193924f5ab05425f39"
 [[package]]
 name = "bulletproofs"
 version = "2.0.0"
-source = "git+https://github.com/dalek-cryptography/bulletproofs?rev=464acb72432ccc6c5131397fd811a5f01ec2454b#464acb72432ccc6c5131397fd811a5f01ec2454b"
+source = "git+https://github.com/eranrund/bulletproofs?rev=c1655c34b5c47df987535624aa3041e797fc1712#c1655c34b5c47df987535624aa3041e797fc1712"
 dependencies = [
  "byteorder",
  "clear_on_drop",
  "curve25519-dalek",
  "digest 0.9.0",
- "merlin 2.0.0",
- "rand_core 0.5.1",
+ "merlin",
+ "rand_core 0.6.2",
  "serde",
  "serde_derive",
  "sha3",
@@ -850,19 +850,6 @@ dependencies = [
  "rand_core 0.6.2",
  "serde",
  "subtle 2.2.3",
- "zeroize",
-]
-
-[[package]]
-name = "curve25519-dalek-ng"
-version = "4.0.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "574d8b2cd0bae5434fd50d53280f8299d95557a978686555880aaf5b8f4f81e9"
-dependencies = [
- "byteorder",
- "digest 0.9.0",
- "rand_core 0.6.2",
- "subtle-ng",
  "zeroize",
 ]
 
@@ -2620,7 +2607,7 @@ dependencies = [
  "ed25519-dalek",
  "generic-array 0.14.4",
  "mc-crypto-digestible-derive",
- "merlin 3.0.0",
+ "merlin",
  "x25519-dalek",
 ]
 
@@ -2645,7 +2632,6 @@ dependencies = [
 name = "mc-crypto-digestible-signature"
 version = "1.0.1-pre1"
 dependencies = [
- "curve25519-dalek-ng",
  "mc-crypto-digestible",
  "schnorrkel",
  "signature",
@@ -3484,7 +3470,7 @@ dependencies = [
  "mc-util-repr-bytes",
  "mc-util-serial",
  "mc-util-test-helper",
- "merlin 3.0.0",
+ "merlin",
  "proptest",
  "prost",
  "rand 0.8.3",
@@ -3880,18 +3866,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b4fc2c02a7e374099d4ee95a193111f72d2110197fe200272371758f6c3643d8"
 dependencies = [
  "autocfg 1.0.0",
-]
-
-[[package]]
-name = "merlin"
-version = "2.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c6feca46f4fa3443a01769d768727f10c10a20fdb65e52dc16a81f0c8269bb78"
-dependencies = [
- "byteorder",
- "keccak",
- "rand_core 0.5.1",
- "zeroize",
 ]
 
 [[package]]
@@ -4571,15 +4545,15 @@ dependencies = [
 
 [[package]]
 name = "protobuf"
-version = "2.20.0"
+version = "2.22.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "86473d5f16580f10b131a0bf0afb68f8e029d1835d33a00f37281b05694e5312"
+checksum = "1b7f4a129bb3754c25a4e04032a90173c68f85168f77118ac4cb4936e7f06f92"
 
 [[package]]
 name = "protobuf-codegen"
-version = "2.20.0"
+version = "2.22.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c8b6ba4581fcd9c3ce3576f25e528467b0d3516e332884c0da6f2084fe59045f"
+checksum = "e5d2fa3a461857508103b914da60dd7b489c1a834967c2e214ecc1496f0c486a"
 dependencies = [
  "protobuf",
 ]
@@ -5172,15 +5146,15 @@ dependencies = [
 [[package]]
 name = "schnorrkel"
 version = "0.10.1"
-source = "git+https://github.com/w3f/schnorrkel?rev=34cdb371c14a73cbe86dfd613ff67d61662b4434#34cdb371c14a73cbe86dfd613ff67d61662b4434"
+source = "git+https://github.com/eranrund/schnorrkel?rev=3cca0b7cb3df1eb9256f12497aed7645bde91ef3#3cca0b7cb3df1eb9256f12497aed7645bde91ef3"
 dependencies = [
  "arrayref",
  "arrayvec",
- "curve25519-dalek-ng",
- "merlin 3.0.0",
+ "curve25519-dalek",
+ "merlin",
  "rand_core 0.6.2",
  "sha2 0.9.3",
- "subtle-ng",
+ "subtle 2.2.3",
  "zeroize",
 ]
 
@@ -5765,12 +5739,6 @@ name = "subtle"
 version = "2.2.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "502d53007c02d7605a05df1c1a73ee436952781653da5d0bf57ad608f66932c1"
-
-[[package]]
-name = "subtle-ng"
-version = "2.4.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8049cf85f0e715d6af38dde439cb0ccb91f67fb9f5f63c80f8b43e48356e1a3f"
 
 [[package]]
 name = "syn"
@@ -6732,11 +6700,10 @@ dependencies = [
 [[package]]
 name = "x25519-dalek"
 version = "1.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bc614d95359fd7afc321b66d2107ede58b246b844cf5d8a0adcca413e439f088"
+source = "git+https://github.com/PaulGrandperrin/x25519-dalek.git?rev=050034c#050034c98c84bfc6ed185147f3e769d0c38c702b"
 dependencies = [
  "curve25519-dalek",
- "rand_core 0.5.1",
+ "rand_core 0.6.2",
  "zeroize",
 ]
 

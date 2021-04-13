@@ -123,6 +123,8 @@ where
     }
 }
 
+// TODO
+#[allow(clippy::from_over_into)]
 impl<Handshake, KexAlgo, Cipher, DigestType> Into<Vec<u8>>
     for AuthRequestOutput<Handshake, KexAlgo, Cipher, DigestType>
 where
@@ -274,6 +276,8 @@ impl AsRef<[u8]> for AuthResponseOutput {
     }
 }
 
+// TODO
+#[allow(clippy::from_over_into)]
 impl Into<Vec<u8>> for AuthResponseOutput {
     fn into(self) -> Vec<u8> {
         self.0
@@ -304,6 +308,8 @@ impl AsRef<[u8]> for AuthResponseInput {
     }
 }
 
+// TODO
+#[allow(clippy::from_over_into)]
 impl Into<Vec<u8>> for AuthResponseInput {
     fn into(self) -> Vec<u8> {
         self.data

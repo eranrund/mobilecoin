@@ -28,6 +28,7 @@ where
     }
 }
 
+#[allow(clippy::from_over_into)]
 impl Into<AuthResponseOutput> for AuthMessage {
     fn into(self) -> AuthResponseOutput {
         let mut taken_self = self;
@@ -35,6 +36,7 @@ impl Into<AuthResponseOutput> for AuthMessage {
     }
 }
 
+#[allow(clippy::from_over_into)]
 impl Into<PeerAuthRequest> for AuthMessage {
     fn into(self) -> PeerAuthRequest {
         self.data.into()
@@ -49,6 +51,7 @@ impl From<PeerAuthRequest> for AuthMessage {
     }
 }
 
+#[allow(clippy::from_over_into)]
 impl Into<ClientAuthRequest> for AuthMessage {
     fn into(self) -> ClientAuthRequest {
         self.data.into()
@@ -63,6 +66,7 @@ impl From<ClientAuthRequest> for AuthMessage {
     }
 }
 
+#[allow(clippy::from_over_into)]
 impl Into<PeerAuthResponse> for AuthMessage {
     fn into(self) -> PeerAuthResponse {
         self.data.into()
@@ -77,6 +81,7 @@ impl From<PeerAuthResponse> for AuthMessage {
     }
 }
 
+#[allow(clippy::from_over_into)]
 impl Into<ClientAuthResponse> for AuthMessage {
     fn into(self) -> ClientAuthResponse {
         self.data.into()
@@ -91,6 +96,7 @@ impl From<ClientAuthResponse> for AuthMessage {
     }
 }
 
+#[allow(clippy::from_over_into)]
 impl<S: Session> Into<EnclaveMessage<S>> for Message {
     fn into(self) -> EnclaveMessage<S> {
         EnclaveMessage {
