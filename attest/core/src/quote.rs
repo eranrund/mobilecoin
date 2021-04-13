@@ -102,6 +102,7 @@ impl From<sgx_quote_sign_type_t> for QuoteSignType {
     }
 }
 
+#[allow(clippy::from_over_into)]
 impl Into<sgx_quote_sign_type_t> for QuoteSignType {
     fn into(self) -> sgx_quote_sign_type_t {
         match self {

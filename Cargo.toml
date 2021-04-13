@@ -148,7 +148,7 @@ serde_cbor = { git = "https://github.com/mobilecoinofficial/cbor", rev = "4c886a
 
 # Not-yet-released version that depends on newer crates.
 # Now supplemented bya private fork because rand.
-bulletproofs = { git = "https://github.com/eranrund/bulletproofs", rev = "c1655c34b5c47df987535624aa3041e797fc1712" }
+bulletproofs = { git = "https://github.com/eranrund/bulletproofs", rev = "24478fd9998a4fff8c9ae70be683fb9fbe4434ab" }
 
 # Patched to disable the cpuid instruction because that is incompatible with our sgx builds.
 cpuid-bool = { git = "https://github.com/eranrund/RustCrypto-utils", rev = "74f8e04e9d18d93fc6d05c72756c236dc88daa19" }

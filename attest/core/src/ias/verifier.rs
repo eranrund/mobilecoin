@@ -479,8 +479,7 @@ impl IasReportVerifier {
             })
             // Then construct a set of chains, one for each signer certificate
             .filter_map(|cert| {
-                let mut signer_chain: Vec<Certificate> = Vec::new();
-                signer_chain.push(cert);
+                let mut signer_chain: Vec<Certificate> = vec![cert];
                 'outer: loop {
                     // Exclude any signing changes greater than our max depth
                     if signer_chain.len() > MAX_CHAIN_DEPTH {

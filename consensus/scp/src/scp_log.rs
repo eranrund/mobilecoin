@@ -13,7 +13,7 @@ use std::{
     fs::{create_dir_all, read, read_dir, remove_dir_all, remove_file, rename, File},
     io::Write,
     marker::PhantomData,
-    path::PathBuf,
+    path::{Path, PathBuf},
     time::{Instant, SystemTime},
 };
 
@@ -325,7 +325,7 @@ pub struct ScpLogReader<V: Value> {
 
 impl<V: Value> ScpLogReader<V> {
     /// Create a new ScpLogReader.
-    pub fn new(path: &PathBuf) -> Result<Self, String> {
+    pub fn new(path: &Path) -> Result<Self, String> {
         let mut files: Vec<_> = read_dir(path)
             .map_err(|e| format!("failed reading dir {:?}: {:?}", path, e))?
             .filter_map(|entry| {

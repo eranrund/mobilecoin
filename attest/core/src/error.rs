@@ -588,6 +588,7 @@ impl Hash for SgxError {
     }
 }
 
+#[allow(clippy::from_over_into)]
 impl Into<sgx_status_t> for SgxError {
     fn into(self) -> sgx_status_t {
         self.0

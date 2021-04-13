@@ -198,10 +198,10 @@ source = "git+https://github.com/eranrund/bulletproofs?rev=c1655c34b5c47df987535
 dependencies = [
  "byteorder",
  "clear_on_drop",
- "curve25519-dalek 3.0.2",
+ "curve25519-dalek",
  "digest",
  "merlin",
- "rand_core 0.6.2",
+ "rand_core",
  "serde",
  "serde_derive",
  "sha3",
@@ -325,28 +325,14 @@ dependencies = [
 
 [[package]]
 name = "curve25519-dalek"
-version = "3.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c8492de420e9e60bc9a1d66e2dbb91825390b738a388606600663fc529b4b307"
-dependencies = [
- "byteorder",
- "digest",
- "packed_simd",
- "rand_core 0.5.1",
- "serde",
- "subtle",
- "zeroize",
-]
-
-[[package]]
-name = "curve25519-dalek"
 version = "3.0.2"
 source = "git+https://github.com/PaulGrandperrin/curve25519-dalek.git?rev=d0dacb2#d0dacb2699fbf166ca7ae5c68518cb5f44e633e7"
 dependencies = [
  "byteorder",
  "digest",
  "packed_simd_2",
- "rand_core 0.6.2",
+ "rand_core",
+ "serde",
  "subtle",
  "zeroize",
 ]
@@ -386,7 +372,7 @@ name = "ed25519-dalek"
 version = "1.0.1"
 source = "git+https://github.com/bltavares/ed25519-dalek.git?rev=5e6c936#5e6c9362ff33c2bbfe189a55e44fd2d68b463227"
 dependencies = [
- "curve25519-dalek 3.0.0",
+ "curve25519-dalek",
  "ed25519",
  "rand",
  "serde",
@@ -658,7 +644,7 @@ name = "mc-account-keys"
 version = "1.0.1-pre1"
 dependencies = [
  "blake2",
- "curve25519-dalek 3.0.0",
+ "curve25519-dalek",
  "displaydoc",
  "hkdf",
  "mc-crypto-digestible",
@@ -669,7 +655,7 @@ dependencies = [
  "mc-util-repr-bytes",
  "mc-util-serial",
  "prost",
- "rand_core 0.6.2",
+ "rand_core",
  "zeroize",
 ]
 
@@ -687,7 +673,7 @@ dependencies = [
  "mc-util-build-script",
  "mc-util-build-sgx",
  "prost",
- "rand_core 0.6.2",
+ "rand_core",
  "serde",
 ]
 
@@ -760,7 +746,7 @@ dependencies = [
  "mc-crypto-keys",
  "mc-crypto-rand",
  "mc-util-serial",
- "rand_core 0.6.2",
+ "rand_core",
  "serde",
  "sha3",
  "siphasher",
@@ -818,7 +804,7 @@ dependencies = [
  "mc-util-from-random",
  "mc-util-serial",
  "prost",
- "rand_core 0.6.2",
+ "rand_core",
 ]
 
 [[package]]
@@ -880,7 +866,7 @@ dependencies = [
  "hkdf",
  "mc-crypto-ct-aead",
  "mc-crypto-keys",
- "rand_core 0.6.2",
+ "rand_core",
 ]
 
 [[package]]
@@ -898,7 +884,7 @@ name = "mc-crypto-digestible"
 version = "1.0.1-pre1"
 dependencies = [
  "cfg-if 0.1.10",
- "curve25519-dalek 3.0.0",
+ "curve25519-dalek",
  "ed25519-dalek",
  "generic-array",
  "mc-crypto-digestible-derive",
@@ -938,7 +924,7 @@ name = "mc-crypto-keys"
 version = "1.0.1-pre1"
 dependencies = [
  "binascii",
- "curve25519-dalek 3.0.0",
+ "curve25519-dalek",
  "digest",
  "ed25519",
  "ed25519-dalek",
@@ -948,7 +934,7 @@ dependencies = [
  "mc-crypto-digestible-signature",
  "mc-util-from-random",
  "mc-util-repr-bytes",
- "rand_core 0.6.2",
+ "rand_core",
  "rand_hc",
  "schnorrkel",
  "serde",
@@ -966,7 +952,7 @@ dependencies = [
  "failure",
  "generic-array",
  "mc-util-serial",
- "rand_core 0.6.2",
+ "rand_core",
  "serde",
  "subtle",
 ]
@@ -983,7 +969,7 @@ dependencies = [
  "hkdf",
  "mc-crypto-keys",
  "mc-util-from-random",
- "rand_core 0.6.2",
+ "rand_core",
  "secrecy",
  "serde",
  "sha2",
@@ -998,7 +984,7 @@ dependencies = [
  "cfg-if 0.1.10",
  "getrandom 0.1.14",
  "rand",
- "rand_core 0.6.2",
+ "rand_core",
  "rand_hc",
 ]
 
@@ -1010,7 +996,7 @@ dependencies = [
  "mc-crypto-rand",
  "mc-sgx-compat",
  "mc-sgx-types",
- "rand_core 0.6.2",
+ "rand_core",
 ]
 
 [[package]]
@@ -1132,7 +1118,7 @@ version = "1.0.1-pre1"
 dependencies = [
  "blake2",
  "bulletproofs",
- "curve25519-dalek 3.0.0",
+ "curve25519-dalek",
  "displaydoc",
  "generic-array",
  "hex_fmt",
@@ -1148,7 +1134,7 @@ dependencies = [
  "mc-util-serial",
  "merlin",
  "prost",
- "rand_core 0.6.2",
+ "rand_core",
  "serde",
  "subtle",
  "zeroize",
@@ -1192,7 +1178,7 @@ dependencies = [
 name = "mc-util-from-random"
 version = "1.0.1-pre1"
 dependencies = [
- "rand_core 0.6.2",
+ "rand_core",
 ]
 
 [[package]]
@@ -1227,7 +1213,7 @@ checksum = "58c38e2799fc0978b65dfff8023ec7843e2330bb462f19198840b34b6582397d"
 dependencies = [
  "byteorder",
  "keccak",
- "rand_core 0.6.2",
+ "rand_core",
  "zeroize",
 ]
 
@@ -1271,15 +1257,6 @@ name = "opaque-debug"
 version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "624a8340c38c1b80fd549087862da4ba43e08858af025b236e509b6649fc13d5"
-
-[[package]]
-name = "packed_simd"
-version = "0.3.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a85ea9fc0d4ac0deb6fe7911d38786b32fc11119afd9e9d38b84ff691ce64220"
-dependencies = [
- "cfg-if 0.1.10",
-]
 
 [[package]]
 name = "packed_simd_2"
@@ -1378,7 +1355,7 @@ checksum = "0ef9e7e66b4468674bfcb0c81af8b7fa0bb154fa9f28eb840da5c447baeb8d7e"
 dependencies = [
  "libc",
  "rand_chacha",
- "rand_core 0.6.2",
+ "rand_core",
  "rand_hc",
 ]
 
@@ -1389,14 +1366,8 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e12735cf05c9e10bf21534da50a147b924d555dc7a547c42e6bb2d5b6017ae0d"
 dependencies = [
  "ppv-lite86",
- "rand_core 0.6.2",
+ "rand_core",
 ]
-
-[[package]]
-name = "rand_core"
-version = "0.5.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "90bde5296fc891b0cef12a6d03ddccc162ce7b2aff54160af9338f8d40df6d19"
 
 [[package]]
 name = "rand_core"
@@ -1413,7 +1384,7 @@ version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3190ef7066a446f2e7f42e239d161e905420ccab01eb967c9eb27d21b2322a73"
 dependencies = [
- "rand_core 0.6.2",
+ "rand_core",
 ]
 
 [[package]]
@@ -1468,9 +1439,9 @@ source = "git+https://github.com/eranrund/schnorrkel?rev=3cca0b7cb3df1eb9256f124
 dependencies = [
  "arrayref",
  "arrayvec",
- "curve25519-dalek 3.0.2",
+ "curve25519-dalek",
  "merlin",
- "rand_core 0.6.2",
+ "rand_core",
  "sha2",
  "subtle",
  "zeroize",
@@ -1820,8 +1791,8 @@ name = "x25519-dalek"
 version = "1.1.0"
 source = "git+https://github.com/PaulGrandperrin/x25519-dalek.git?rev=050034c#050034c98c84bfc6ed185147f3e769d0c38c702b"
 dependencies = [
- "curve25519-dalek 3.0.0",
- "rand_core 0.6.2",
+ "curve25519-dalek",
+ "rand_core",
  "zeroize",
 ]
 
