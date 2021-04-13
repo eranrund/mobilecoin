@@ -194,7 +194,7 @@ checksum = "8d696c370c750c948ada61c69a0ee2cbbb9c50b1019ddb86d9317157a99c2cae"
 [[package]]
 name = "bulletproofs"
 version = "2.0.0"
-source = "git+https://github.com/eranrund/bulletproofs?rev=c1655c34b5c47df987535624aa3041e797fc1712#c1655c34b5c47df987535624aa3041e797fc1712"
+source = "git+https://github.com/eranrund/bulletproofs?rev=24478fd9998a4fff8c9ae70be683fb9fbe4434ab#24478fd9998a4fff8c9ae70be683fb9fbe4434ab"
 dependencies = [
  "byteorder",
  "clear_on_drop",
@@ -889,6 +889,7 @@ dependencies = [
  "generic-array",
  "mc-crypto-digestible-derive",
  "merlin",
+ "serde",
  "x25519-dalek",
 ]
 
