@@ -111,6 +111,8 @@ where
 }
 
 /// A HandshakeHash may be consumed to reveal the result.
+// TODO
+#[allow(clippy::from_over_into)]
 impl<DigestType: Default + FixedOutput + Update> Into<Vec<u8>> for HandshakeHash<DigestType> {
     fn into(self) -> Vec<u8> {
         self.hash.expose_secret().clone()

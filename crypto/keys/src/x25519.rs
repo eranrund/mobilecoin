@@ -290,7 +290,7 @@ impl<'de> Deserialize<'de> for X25519Public {
             }
 
             fn visit_bytes<E: DeserializeError>(self, value: &[u8]) -> Result<Self::Value, E> {
-                Ok(X25519Public::try_from_der(value).map_err(|err| E::custom(err.to_string()))?)
+                X25519Public::try_from_der(value).map_err(|err| E::custom(err.to_string()))
             }
         }
 
@@ -516,7 +516,7 @@ impl<'de> Deserialize<'de> for X25519Private {
             }
 
             fn visit_bytes<E: DeserializeError>(self, value: &[u8]) -> Result<Self::Value, E> {
-                Ok(X25519Private::try_from_der(value).map_err(|err| E::custom(err.to_string()))?)
+                X25519Private::try_from_der(value).map_err(|err| E::custom(err.to_string()))
             }
         }
 
@@ -538,6 +538,8 @@ impl<'de> Deserialize<'de> for X25519Private {
 /// let keyout: Vec<u8> = privkey.into();
 /// assert_eq!(&key as &[u8], keyout.as_slice());
 /// ```
+// TODO
+#[allow(clippy::from_over_into)]
 impl Into<Vec<u8>> for X25519Private {
     fn into(self) -> Vec<u8> {
         self.0.to_bytes().to_vec()

@@ -26,14 +26,14 @@ x25519-dalek = { version = "1.1.0", default-features = false, features = ["night
 zeroize = { version = "1", default-features = false }
 
 # Overridden since we need a not-yet-released commit that uprevs a bunch of dependencies.
-schnorrkel = { git = "https://github.com/w3f/schnorrkel", rev = "34cdb371c14a73cbe86dfd613ff67d61662b4434", default-features = false }
+schnorrkel = { git = "https://github.com/eranrund/schnorrkel", rev = "3cca0b7cb3df1eb9256f12497aed7645bde91ef3", default-features = false }
 
 [target.'cfg(any(target_feature = "avx2", target_feature = "avx"))'.dependencies]
-curve25519-dalek = { version = "3.0", default-features = false, features = ["simd_backend", "nightly"] }
+curve25519-dalek = { version = "3.0", default-features = false, features = ["simd_backend", "nightly", "serde"] }
 ed25519-dalek = { version = "1.0.0", default-features = false, features = ["alloc", "nightly", "serde", "simd_backend"] }
 
 [target.'cfg(not(any(target_feature = "avx2", target_feature = "avx")))'.dependencies]
-curve25519-dalek = { version = "3.0", default-features = false, features = ["nightly", "u64_backend"] }
+curve25519-dalek = { version = "3.0", default-features = false, features = ["nightly", "u64_backend", "serde"] }
 ed25519-dalek = { version = "1.0.0", default-features = false, features = ["alloc", "nightly", "serde", "u64_backend"] }
 
 [dev-dependencies]

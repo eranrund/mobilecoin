@@ -42,6 +42,8 @@ impl AsRef<[u8]> for Slip10Key {
 /// Create the view and spend private keys, and return them in reverse order,
 /// e.g. `(spend, view)`, to match
 /// [`AccountKey::new()`](mc_account_key::AccountKey::new)
+// TODO
+#[allow(clippy::from_over_into)]
 impl Into<(RistrettoPrivate, RistrettoPrivate)> for Slip10Key {
     fn into(self) -> (RistrettoPrivate, RistrettoPrivate) {
         let mut okm = [0u8; 64];

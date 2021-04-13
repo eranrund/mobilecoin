@@ -108,9 +108,9 @@ checksum = "a4c527152e37cf757a3f78aae5a06fbeefdb07ccc535c980a3208ee3060dd544"
 
 [[package]]
 name = "arrayvec"
-version = "0.5.1"
+version = "0.5.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cff77d8686867eceff3105329d4698d96c2391c176d5d03adc90c7389162b5b8"
+checksum = "23b62fc65de8e4e7f52534fb52b0f3ed04746ae267519eef2a83941e8085068b"
 
 [[package]]
 name = "async-compression"
@@ -385,7 +385,7 @@ dependencies = [
  "clear_on_drop",
  "curve25519-dalek",
  "digest 0.9.0",
- "merlin",
+ "merlin 2.0.0",
  "rand_core 0.5.1",
  "serde",
  "serde_derive",
@@ -842,15 +842,27 @@ dependencies = [
 [[package]]
 name = "curve25519-dalek"
 version = "3.0.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f627126b946c25a4638eec0ea634fc52506dea98db118aae985118ce7c3d723f"
+source = "git+https://github.com/PaulGrandperrin/curve25519-dalek.git?rev=d0dacb2#d0dacb2699fbf166ca7ae5c68518cb5f44e633e7"
 dependencies = [
  "byteorder",
  "digest 0.9.0",
  "packed_simd_2",
- "rand_core 0.5.1",
+ "rand_core 0.6.2",
  "serde",
  "subtle 2.2.3",
+ "zeroize",
+]
+
+[[package]]
+name = "curve25519-dalek-ng"
+version = "4.0.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "574d8b2cd0bae5434fd50d53280f8299d95557a978686555880aaf5b8f4f81e9"
+dependencies = [
+ "byteorder",
+ "digest 0.9.0",
+ "rand_core 0.6.2",
+ "subtle-ng",
  "zeroize",
 ]
 
@@ -1027,7 +1039,7 @@ dependencies = [
  "rand 0.8.3",
  "serde",
  "serde_bytes",
- "sha2 0.9.2",
+ "sha2 0.9.3",
  "zeroize",
 ]
 
@@ -1892,9 +1904,9 @@ checksum = "b294d6fa9ee409a054354afc4352b0b9ef7ca222c69b8812cbea9e7d2bf3783f"
 
 [[package]]
 name = "libc"
-version = "0.2.80"
+version = "0.2.93"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4d58d1b70b004888f764dfbf6a26a3b0342a1632d33968e4a179d8011c760614"
+checksum = "9385f66bf6105b241aa65a61cb923ef20efc665cb9f9bb50ac2f0c4b7f378d41"
 
 [[package]]
 name = "libloading"
@@ -2074,7 +2086,7 @@ dependencies = [
  "hkdf",
  "mc-account-keys",
  "mc-crypto-keys",
- "sha2 0.9.2",
+ "sha2 0.9.3",
  "slip10_ed25519",
  "tiny-bip39",
  "zeroize",
@@ -2149,7 +2161,7 @@ dependencies = [
  "rand_core 0.6.2",
  "rand_hc 0.3.0",
  "serde",
- "sha2 0.9.2",
+ "sha2 0.9.3",
 ]
 
 [[package]]
@@ -2202,7 +2214,7 @@ dependencies = [
  "rand_hc 0.3.0",
  "rjson",
  "serde",
- "sha2 0.9.2",
+ "sha2 0.9.3",
  "subtle 2.2.3",
 ]
 
@@ -2234,7 +2246,7 @@ dependencies = [
  "rand 0.8.3",
  "reqwest",
  "serde_json",
- "sha2 0.9.2",
+ "sha2 0.9.3",
 ]
 
 [[package]]
@@ -2318,7 +2330,7 @@ dependencies = [
  "rand_hc 0.3.0",
  "retry",
  "secrecy",
- "sha2 0.9.2",
+ "sha2 0.9.3",
  "tempdir",
 ]
 
@@ -2570,7 +2582,7 @@ dependencies = [
  "mc-sgx-build",
  "mc-sgx-compat",
  "mc-util-from-random",
- "sha2 0.9.2",
+ "sha2 0.9.3",
 ]
 
 [[package]]
@@ -2608,7 +2620,7 @@ dependencies = [
  "ed25519-dalek",
  "generic-array 0.14.4",
  "mc-crypto-digestible-derive",
- "merlin",
+ "merlin 3.0.0",
  "x25519-dalek",
 ]
 
@@ -2633,6 +2645,7 @@ dependencies = [
 name = "mc-crypto-digestible-signature"
 version = "1.0.1-pre1"
 dependencies = [
+ "curve25519-dalek-ng",
  "mc-crypto-digestible",
  "schnorrkel",
  "signature",
@@ -2680,7 +2693,7 @@ dependencies = [
  "semver 0.11.0",
  "serde",
  "serde_json",
- "sha2 0.9.2",
+ "sha2 0.9.3",
  "signature",
  "tempdir",
  "x25519-dalek",
@@ -2717,7 +2730,7 @@ dependencies = [
  "rand_hc 0.3.0",
  "secrecy",
  "serde",
- "sha2 0.9.2",
+ "sha2 0.9.3",
  "subtle 2.2.3",
  "zeroize",
 ]
@@ -3147,7 +3160,7 @@ dependencies = [
  "rand 0.8.3",
  "rand_hc 0.3.0",
  "retry",
- "sha2 0.9.2",
+ "sha2 0.9.3",
 ]
 
 [[package]]
@@ -3211,7 +3224,7 @@ name = "mc-sgx-css"
 version = "1.0.1-pre1"
 dependencies = [
  "displaydoc",
- "sha2 0.9.2",
+ "sha2 0.9.3",
 ]
 
 [[package]]
@@ -3471,7 +3484,7 @@ dependencies = [
  "mc-util-repr-bytes",
  "mc-util-serial",
  "mc-util-test-helper",
- "merlin",
+ "merlin 3.0.0",
  "proptest",
  "prost",
  "rand 0.8.3",
@@ -3644,7 +3657,7 @@ dependencies = [
  "prometheus",
  "protobuf",
  "rand 0.8.3",
- "sha2 0.9.2",
+ "sha2 0.9.3",
  "signal-hook",
  "subtle 2.2.3",
  "tempfile",
@@ -3878,6 +3891,18 @@ dependencies = [
  "byteorder",
  "keccak",
  "rand_core 0.5.1",
+ "zeroize",
+]
+
+[[package]]
+name = "merlin"
+version = "3.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "58c38e2799fc0978b65dfff8023ec7843e2330bb462f19198840b34b6582397d"
+dependencies = [
+ "byteorder",
+ "keccak",
+ "rand_core 0.6.2",
  "zeroize",
 ]
 
@@ -5146,16 +5171,16 @@ dependencies = [
 
 [[package]]
 name = "schnorrkel"
-version = "0.9.1"
-source = "git+https://github.com/w3f/schnorrkel?rev=cfdbe9ae865a4d3ffa2566d896d4dbedf5107028#cfdbe9ae865a4d3ffa2566d896d4dbedf5107028"
+version = "0.10.1"
+source = "git+https://github.com/w3f/schnorrkel?rev=34cdb371c14a73cbe86dfd613ff67d61662b4434#34cdb371c14a73cbe86dfd613ff67d61662b4434"
 dependencies = [
  "arrayref",
  "arrayvec",
- "curve25519-dalek",
- "merlin",
- "rand_core 0.5.1",
- "sha2 0.9.2",
- "subtle 2.2.3",
+ "curve25519-dalek-ng",
+ "merlin 3.0.0",
+ "rand_core 0.6.2",
+ "sha2 0.9.3",
+ "subtle-ng",
  "zeroize",
 ]
 
@@ -5376,9 +5401,9 @@ dependencies = [
 
 [[package]]
 name = "sha2"
-version = "0.9.2"
+version = "0.9.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6e7aab86fe2149bad8c507606bdb3f4ef5e7b2380eb92350f56122cca72a42a8"
+checksum = "fa827a14b29ab7f44778d14a88d3cb76e949c45083f7dbfa507d0cb699dc12de"
 dependencies = [
  "block-buffer 0.9.0",
  "cfg-if 1.0.0",
@@ -5742,6 +5767,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "502d53007c02d7605a05df1c1a73ee436952781653da5d0bf57ad608f66932c1"
 
 [[package]]
+name = "subtle-ng"
+version = "2.4.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8049cf85f0e715d6af38dde439cb0ccb91f67fb9f5f63c80f8b43e48356e1a3f"
+
+[[package]]
 name = "syn"
 version = "0.15.44"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5933,7 +5964,7 @@ dependencies = [
  "pbkdf2",
  "rand 0.7.3",
  "rustc-hash",
- "sha2 0.9.2",
+ "sha2 0.9.3",
  "thiserror",
  "unicode-normalization",
  "zeroize",

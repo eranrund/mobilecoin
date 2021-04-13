@@ -96,6 +96,8 @@ impl AsRef<Scalar> for CurveScalar {
     }
 }
 
+// TODO
+#[allow(clippy::from_over_into)]
 impl Into<Scalar> for CurveScalar {
     fn into(self) -> Scalar {
         self.scalar

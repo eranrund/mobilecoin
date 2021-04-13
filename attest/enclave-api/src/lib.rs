@@ -27,6 +27,8 @@ impl From<Vec<u8>> for ClientAuthRequest {
     }
 }
 
+// TODO
+#[allow(clippy::from_over_into)]
 impl Into<Vec<u8>> for ClientAuthRequest {
     fn into(self) -> Vec<u8> {
         self.0
@@ -38,6 +40,8 @@ impl Into<Vec<u8>> for ClientAuthRequest {
 #[derive(Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct ClientAuthResponse(Vec<u8>);
 
+// TODO
+#[allow(clippy::from_over_into)]
 impl Into<Vec<u8>> for ClientAuthResponse {
     fn into(self) -> Vec<u8> {
         self.0
@@ -61,6 +65,8 @@ impl From<Vec<u8>> for PeerAuthRequest {
     }
 }
 
+// TODO
+#[allow(clippy::from_over_into)]
 impl Into<Vec<u8>> for PeerAuthRequest {
     fn into(self) -> Vec<u8> {
         self.0
@@ -72,6 +78,8 @@ impl Into<Vec<u8>> for PeerAuthRequest {
 #[derive(Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct PeerAuthResponse(Vec<u8>);
 
+// TODO
+#[allow(clippy::from_over_into)]
 impl Into<Vec<u8>> for PeerAuthResponse {
     fn into(self) -> Vec<u8> {
         self.0
@@ -134,6 +142,8 @@ impl From<Vec<u8>> for ClientSession {
     }
 }
 
+// TODO
+#[allow(clippy::from_over_into)]
 impl Into<Vec<u8>> for ClientSession {
     fn into(self) -> Vec<u8> {
         self.0
@@ -167,6 +177,8 @@ impl From<Vec<u8>> for PeerSession {
     }
 }
 
+// TODO
+#[allow(clippy::from_over_into)]
 impl Into<Vec<u8>> for PeerSession {
     fn into(self) -> Vec<u8> {
         self.0

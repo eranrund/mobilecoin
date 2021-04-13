@@ -77,6 +77,8 @@ fn hash_nil() -> [u8; 32] {
 /// * An error if a and b were not adjacent, which implies that the merkle proof
 ///   was badly structured. This error can be mapped to e.g.
 ///   Error::UnexpectedMembershipElement and the caller can provide context.
+// TODO
+#[allow(clippy::result_unit_err)]
 pub fn compose_adjacent_membership_elements(
     a: &TxOutMembershipElement,
     b: &TxOutMembershipElement,
@@ -168,7 +170,7 @@ pub fn compute_implied_merkle_root(
     let first = proof
         .elements
         .first()
-        .ok_or_else(|| Error::MissingLeafHash(proof.index))?
+        .ok_or(Error::MissingLeafHash(proof.index))?
         .clone();
     if first.range.from != proof.index || first.range.to != proof.index {
         return Err(Error::MissingLeafHash(proof.index));
@@ -220,7 +222,7 @@ pub fn is_membership_proof_valid(
     let first = proof
         .elements
         .first()
-        .ok_or_else(|| Error::MissingLeafHash(proof.index))?;
+        .ok_or(Error::MissingLeafHash(proof.index))?;
     if first.range.from != proof.index || first.range.to != proof.index {
         return Err(Error::MissingLeafHash(proof.index));
     }
