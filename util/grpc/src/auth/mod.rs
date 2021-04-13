@@ -273,10 +273,8 @@ mod test {
         }
 
         // Authorizing with a valid Authorization header should succeed.
-        let generator = TokenBasicCredentialsGenerator::new(
-            shared_secret,
-            SystemTimeProvider::default(),
-        );
+        let generator =
+            TokenBasicCredentialsGenerator::new(shared_secret, SystemTimeProvider::default());
         let creds = generator
             .generate_for(TEST_USERNAME)
             .expect("failed generating token");
