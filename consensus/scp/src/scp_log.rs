@@ -390,15 +390,15 @@ mod tests {
         let dir = TempDir::new("test").unwrap();
         let out_path = dir.path().join("debug_output");
 
-        let cur_slot = out_path.clone().join("cur-slot");
+        let cur_slot = out_path.join("cur-slot");
         create_dir_all(cur_slot.as_path()).unwrap();
 
-        let slot_states = out_path.clone().join("slot-states");
+        let slot_states = out_path.join("slot-states");
         create_dir_all(slot_states.as_path()).unwrap();
 
         assert!(out_path.exists());
 
         let node = MockScpNode::<&'static str>::new();
-        let _logging_scp_node = LoggingScpNode::new(node, out_path.clone(), logger).unwrap();
+        let _logging_scp_node = LoggingScpNode::new(node, out_path, logger).unwrap();
     }
 }

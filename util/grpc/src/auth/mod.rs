@@ -242,7 +242,7 @@ mod test {
     fn authenticate_token() {
         let shared_secret = [66; 32];
         let authenticator = TokenAuthenticator::new(
-            shared_secret.clone(),
+            shared_secret,
             TOKEN_MAX_LIFETIME,
             SystemTimeProvider::default(),
         );
@@ -274,7 +274,7 @@ mod test {
 
         // Authorizing with a valid Authorization header should succeed.
         let generator = TokenBasicCredentialsGenerator::new(
-            shared_secret.clone(),
+            shared_secret,
             SystemTimeProvider::default(),
         );
         let creds = generator

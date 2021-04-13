@@ -2399,7 +2399,7 @@ mod nominate_protocol_tests {
 
             let expected = Msg::new(
                 local_node.0.clone(),
-                local_node.1.clone(),
+                local_node.1,
                 slot_index,
                 Topic::Nominate(NominatePayload {
                     X: btreeset! { 777, 1000, 2000, 4242},
@@ -2449,10 +2449,10 @@ mod ballot_protocol_tests {
 
         let expected = Msg::new(
             local_node.0.clone(),
-            local_node.1.clone(),
+            local_node.1,
             slot_index,
             Topic::Externalize(ExternalizePayload {
-                C: Ballot::new(1, &vec![1234, 1337, 1338, 5678]),
+                C: Ballot::new(1, &[1234, 1337, 1338, 5678]),
                 HN: 1,
             }),
         );
@@ -2547,7 +2547,7 @@ mod ballot_protocol_tests {
                 node_1.1.clone(),
                 slot_index,
                 Topic::Nominate(NominatePayload {
-                    X: values.clone(),
+                    X: values,
                     Y: BTreeSet::default(),
                 }),
             );

@@ -324,7 +324,7 @@ macro_rules! derive_serde_from_repr_bytes {
                         let value =
                             &<GenericArray<u8, <$mytype as ReprBytes>::Size>>::from_slice(value);
                         <$mytype as ReprBytes>::from_bytes(value)
-                            .map_err(|err| <E as $crate::_exports::serde::de::Error>::custom(err))
+                            .map_err(<E as $crate::_exports::serde::de::Error>::custom)
                     }
 
                     fn visit_seq<V>(self, mut seq: V) -> Result<Self::Value, V::Error>

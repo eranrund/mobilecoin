@@ -174,7 +174,7 @@ mod tests {
         const TEST_USERNAME: &str = "test user";
 
         let generator = TokenBasicCredentialsGenerator::new(
-            shared_secret.clone(),
+            shared_secret,
             SystemTimeProvider::default(),
         );
         let authenticator = TokenAuthenticator::new(
@@ -213,7 +213,7 @@ mod tests {
         const TEST_USERNAME: &str = "test user";
 
         let generator = TokenBasicCredentialsGenerator::new(
-            shared_secret.clone(),
+            shared_secret,
             SystemTimeProvider::default(),
         );
 
