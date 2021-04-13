@@ -115,6 +115,7 @@ impl From<ConsensusGrpcError> for RpcStatus {
 
 /// Convert a `ConsensusGrpcError` into either `ProposeTxResponse` or
 /// `RpcStatus`, depending on which error it holds.
+#[allow(clippy::from_over_into)]
 impl Into<Result<ProposeTxResponse, RpcStatus>> for ConsensusGrpcError {
     fn into(self) -> Result<ProposeTxResponse, RpcStatus> {
         match self {

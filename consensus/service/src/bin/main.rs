@@ -20,7 +20,7 @@ use std::{
     env,
     fs::File,
     io::{Read, Write},
-    path::PathBuf,
+    path::Path,
     sync::Arc,
 };
 use structopt::StructOpt;
@@ -114,7 +114,7 @@ fn main() -> Result<(), ConsensusServiceError> {
     panic!("Oh oh, our threads died");
 }
 
-fn setup_ledger_dir(config_origin_path: &Option<PathBuf>, ledger_path: &PathBuf) {
+fn setup_ledger_dir(config_origin_path: &Option<Path>, ledger_path: &Path) {
     if let Some(origin_block_path) = config_origin_path.clone() {
         // Copy origin block to ledger_db path if there are not already contents in
         // ledger_db. If ledger_path does not exist, create the dir.

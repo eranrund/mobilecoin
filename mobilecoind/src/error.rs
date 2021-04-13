@@ -16,8 +16,8 @@ use retry::Error as RetryError;
 
 #[derive(Debug, Fail)]
 pub enum Error {
-    #[fail(display = "Failure with LMDB: {}", _0)]
-    LMDB(LmdbError),
+    #[fail(display = "Failure with Lmdb: {}", _0)]
+    Lmdb(LmdbError),
 
     #[fail(display = "Failure with LedgerDB: {}", _0)]
     LedgerDB(LedgerDbError),
@@ -127,7 +127,7 @@ impl From<RetryError<ConnectionError>> for Error {
 
 impl From<LmdbError> for Error {
     fn from(e: LmdbError) -> Self {
-        Self::LMDB(e)
+        Self::Lmdb(e)
     }
 }
 

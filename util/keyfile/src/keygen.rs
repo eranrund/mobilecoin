@@ -115,7 +115,7 @@ fn compare_keyfile_names(a: &Path, b: &Path) -> Ordering {
 #[cfg(test)]
 mod testing {
     use super::*;
-    use std::{collections::HashSet, iter::FromIterator};
+    use std::{collections::HashSet, iter::FromIterator, path::PathBuf};
     use tempdir::TempDir;
 
     #[test]
