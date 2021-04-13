@@ -1019,7 +1019,7 @@ dependencies = [
 [[package]]
 name = "ed25519-dalek"
 version = "1.0.1"
-source = "git+https://github.com/bltavares/ed25519-dalek.git?rev=5e6c936#5e6c9362ff33c2bbfe189a55e44fd2d68b463227"
+source = "git+https://github.com/eranrund/ed25519-dalek.git?rev=ec2c989e777d3f26937f7a82e84f14b5fe6794df#ec2c989e777d3f26937f7a82e84f14b5fe6794df"
 dependencies = [
  "curve25519-dalek",
  "ed25519",

@@ -159,7 +159,7 @@ aes-gcm = { git = "https://github.com/mobilecoinofficial/AEADs", rev = "d1a8517d
 # ed25519-dalek depends on rand 0.7 which in turns depends on a broken version of packed_simd
 # This is a PR that moves it to newer rand
 # TODO if moving forward, this must be forked into a repo we control
-ed25519-dalek = { git = "https://github.com/bltavares/ed25519-dalek.git", rev = "5e6c936" }
+ed25519-dalek = { git = "https://github.com/eranrund/ed25519-dalek.git", rev = "ec2c989e777d3f26937f7a82e84f14b5fe6794df" }
 
 # See https://github.com/commure/datatest/pull/30
 # TODO fork to our org

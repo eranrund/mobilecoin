@@ -370,7 +370,7 @@ dependencies = [
 [[package]]
 name = "ed25519-dalek"
 version = "1.0.1"
-source = "git+https://github.com/bltavares/ed25519-dalek.git?rev=5e6c936#5e6c9362ff33c2bbfe189a55e44fd2d68b463227"
+source = "git+https://github.com/eranrund/ed25519-dalek.git?rev=41d55e7e4fcfe8247012ba6d78e6df6d2fbb13bd#41d55e7e4fcfe8247012ba6d78e6df6d2fbb13bd"
 dependencies = [
  "curve25519-dalek",
  "ed25519",
@@ -889,7 +889,6 @@ dependencies = [
  "generic-array",
  "mc-crypto-digestible-derive",
  "merlin",
- "serde",
  "x25519-dalek",
 ]
 
