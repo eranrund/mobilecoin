@@ -3041,7 +3041,7 @@ dependencies = [
  "prost",
  "protobuf",
  "rand 0.8.3",
- "rand_chacha 0.2.2",
+ "rand_chacha 0.3.0",
  "rand_core 0.6.2",
  "reqwest",
  "retry",

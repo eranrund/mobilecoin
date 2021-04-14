@@ -1296,7 +1296,7 @@ mod test {
     };
     use mc_util_from_random::FromRandom;
     use rand::{rngs::StdRng, SeedableRng};
-    use std::iterator::FromIter;
+    use std::{collections::HashMap, iter::FromIterator};
 
     /// Test conversion of TxProposal
     #[test]

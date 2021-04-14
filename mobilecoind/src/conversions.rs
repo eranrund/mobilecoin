@@ -179,6 +179,7 @@ mod test {
     };
     use mc_util_from_random::FromRandom;
     use rand::{rngs::StdRng, SeedableRng};
+    use std::iter::FromIterator;
 
     #[test]
     fn test_unspent_tx_out_conversion() {
