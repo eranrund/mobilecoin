@@ -1215,7 +1215,7 @@ mod ledger_db_test {
     }
 
     #[test]
-    /// Appending blocks that have ever-increasing and continous version numbers
+    /// Appending blocks that have ever-increasing version numbers
     /// should work as long as it is <= BLOCK_VERSION.
     /// Appending a block > BLOCK_VERSION should fail even if it is after a
     /// block with version == BLOCK_VERSION.
