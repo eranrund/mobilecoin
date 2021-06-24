@@ -470,13 +470,12 @@ dependencies = [
 
 [[package]]
 name = "cargo_metadata"
-version = "0.9.1"
+version = "0.12.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "46e3374c604fb39d1a2f35ed5e4a4e30e60d01fab49446e08f1b3e9a90aef202"
+checksum = "d5a5f7b42f606b7f23674f6f4d877628350682bc40687d3fae65679a58d55345"
 dependencies = [
- "semver 0.9.0",
+ "semver 0.11.0",
  "serde",
- "serde_derive",
  "serde_json",
 ]
 
@@ -3440,7 +3439,7 @@ name = "mc-util-build-enclave"
 version = "1.1.0"
 dependencies = [
  "cargo-emit",
- "cargo_metadata 0.9.1",
+ "cargo_metadata 0.12.0",
  "displaydoc",
  "mbedtls",
  "mbedtls-sys-auto",
@@ -5140,6 +5139,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f301af10236f6df4160f7c3f04eec6dbc70ace82d23326abad5edee88801c6b6"
 dependencies = [
  "semver-parser 0.10.1",
+ "serde",
 ]
 
 [[package]]
