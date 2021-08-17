@@ -20,3 +20,6 @@ mc-util-uri = { path = "../../../util/uri" }
 
 displaydoc = { version = "0.2", default-features = false }
 mockall = { version = "0.8.3", optional = true }
+
+[dev-dependencies]
+mockall = { version = "0.8.3" }

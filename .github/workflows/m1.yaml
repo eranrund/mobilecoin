@@ -1,0 +1,29 @@
+name: m1
+
+on: pull_request
+
+env:
+  CARGO_INCREMENTAL: 0
+  RUSTFLAGS: "-Dwarnings"
+
+jobs:
+  build:
+    runs-on: [self-hosted, macOS, ARM]
+    env:
+      SGX_MODE: SW
+      IAS_MODE: DEV
+      OPENSSL_BIN: /opt/homebrew/opt/openssl/bin/openssl
+    strategy:
+      matrix:
+       include:
+          - rust: nightly-2021-07-21
+          - rust: nightly
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: ${{ matrix.rust }}
+          override: true
+          profile: minimal
+      - run: |
+          PATH=/opt/homebrew/bin:$PATH arch -arm64 cargo test -p mc-account-keys -p mc-account-keys-slip10 -p mc-api -p mc-attest-ake -p mc-attest-core -p mc-common -p mc-crypto-box -p mc-crypto-digestible -p mc-crypto-digestible-derive -p mc-crypto-digestible-signature -p mc-crypto-hashes -p mc-crypto-keys -p mc-crypto-noise -p mc-crypto-rand -p mc-crypto-sig -p mc-crypto-x509-utils -p mc-fog-report-validation -p mc-fog-sig -p mc-fog-sig-authority -p mc-fog-sig-report -p mc-fog-types -p mc-sgx-css -p mc-sgx-types -p mc-transaction-core -p mc-transaction-std -p mc-util-build-grpc -p mc-util-build-script -p mc-util-build-sgx -p mc-util-encodings -p mc-util-from-random -p mc-util-host-cert -p mc-util-repr-bytes -p mc-util-serial -p mc-util-uri -p mc-watcher-api

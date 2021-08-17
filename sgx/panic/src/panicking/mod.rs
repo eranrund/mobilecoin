@@ -4,9 +4,9 @@ use super::panic_strategy;
 /// This module defines a `panic_handler` lang item and defines a function
 /// `log_and_panic` which does logging as appropriate before calling to
 /// `panic_strategy` module to actually initiate a panic.
-/// A thread-local panic_counter variable is provided by submodule `panic_counter`
-/// which keeps track of how many times we have looped through the panic
-/// infrastructure, in order to break recursive panics.
+/// A thread-local panic_counter variable is provided by submodule
+/// `panic_counter` which keeps track of how many times we have looped through
+/// the panic infrastructure, in order to break recursive panics.
 /// The `try` function takes a closure and submits it to the panic_strategy,
 /// taking care to return the results in a nice format and decremeent the
 /// panic_counter in case a panic was caught.
@@ -89,9 +89,9 @@ pub fn rethrow(msg: Box<dyn Any + Send>) -> ! {
 /// try_closure:
 /// Invoke a closure, capturing the cause of an unwinding panic if one occurs.
 #[cfg(feature = "alloc")]
-pub unsafe fn try_closure<R, F: FnOnce() -> R>(f: F) -> Result<R, Box<dyn Any + Send>> {
+pub unsafe fn try_closure<R, F: FnOnce() -> R>(f: F) -> Result<R, Box<dyn Any + Send + 'static>> {
     use self::panic_counter::update_panic_count;
-    use core::{mem, mem::ManuallyDrop, raw};
+    use core::{mem, mem::ManuallyDrop};
 
     union Data<F, R> {
         f: ManuallyDrop<F>,
@@ -112,8 +112,8 @@ pub unsafe fn try_closure<R, F: FnOnce() -> R>(f: F) -> Result<R, Box<dyn Any + 
     // * If the closure successfully returns, we write the return value into the
     //   data's return slot. Note that `ptr::write` is used as it's overwriting
     //   uninitialized data.
-    // * Finally, when we come back out of the `__rust_maybe_catch_panic` we're
-    //   in one of two states:
+    // * Finally, when we come back out of the `__rust_maybe_catch_panic` we're in
+    //   one of two states:
     //
     //      1. The closure didn't panic, in which case the return value was
     //         filled in. We move it out of `data` and return it.
@@ -142,7 +142,10 @@ pub unsafe fn try_closure<R, F: FnOnce() -> R>(f: F) -> Result<R, Box<dyn Any + 
     } else {
         update_panic_count(-1);
         debug_assert!(update_panic_count(0) == 0);
-        Err(mem::transmute(raw::TraitObject {
+        // FIXME: this has been deprecated in latest nightly, see
+        //        https://rust-lang.github.io/rfcs/2580-ptr-meta.html for
+        //        details on how to fix it.
+        Err(mem::transmute(TraitObject {
             data: any_data as *mut _,
             vtable: any_vtable as *mut _,
         }))
