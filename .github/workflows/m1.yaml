@@ -1,4 +1,4 @@
-name: m1-yaml
+name: m1
 
 on: pull_request
 
@@ -9,6 +9,10 @@ env:
 jobs:
   build:
     runs-on: [self-hosted, macOS, ARM]
+    env:
+      SGX_MODE: SW
+      IAS_MODE: DEV
+      OPENSSL_BIN: /opt/homebrew/opt/openssl/bin/openssl
     strategy:
       matrix:
        include:
