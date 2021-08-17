@@ -15,7 +15,7 @@ jobs:
     runs-on: [self-hosted, macOS, ARM]
     strategy:
       matrix:
-	include:
+       include:
           - rust: nightly-2021-07-21
           - rust: nightly
     steps:
