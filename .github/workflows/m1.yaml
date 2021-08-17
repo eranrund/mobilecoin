@@ -1,0 +1,30 @@
+name: m1-yaml
+
+on: pull_request
+
+defaults:
+  run:
+    working-directory: "panic/abort"
+
+env:
+  CARGO_INCREMENTAL: 0
+  RUSTFLAGS: "-Dwarnings"
+
+jobs:
+  build:
+    runs-on: [self-hosted, macOS, ARM]
+    strategy:
+      matrix:
+        - nightly-2021-07-21
+        - nightly
+      target:
+        - aarch64-apple-darwin
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: ${{ matrix.rust }}
+          target: ${{ matrix.target }}
+          override: true
+          profile: minimal
+      - run: cargo build --release --target ${{ matrix.target }}
