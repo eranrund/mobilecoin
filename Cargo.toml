@@ -36,6 +36,7 @@ members = [
     "crypto/noise",
     "crypto/rand",
     "crypto/x509/test-vectors",
+    "crypto/sig",
     "crypto/x509/utils",
     "enclave-boundary",
     "fog/api",

@@ -176,7 +176,7 @@ cfg_if::cfg_if! {
 
             #[test]
             fn basic_trace_time() {
-                let logger = create_test_logger("basic_trace_time".to_string());
+                let logger = create_null_logger();
 
                 slog_scope::scope(&logger.clone(), || {
                     trace_time!(global_logger(), "test global");
