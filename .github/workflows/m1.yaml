@@ -17,8 +17,6 @@ jobs:
       matrix:
         - nightly-2021-07-21
         - nightly
-      target:
-        - aarch64-apple-darwin
     steps:
       - uses: actions/checkout@v1
       - uses: actions-rs/toolchain@v1
@@ -27,4 +25,4 @@ jobs:
           target: ${{ matrix.target }}
           override: true
           profile: minimal
-      - run: cargo build --release --target ${{ matrix.target }}
+      - run: cargo build --release
