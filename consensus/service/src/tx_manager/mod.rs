@@ -34,21 +34,36 @@ pub use untrusted_interfaces::UntrustedInterfaces;
 #[cfg(test)]
 pub use tx_manager_trait::MockTxManager;
 
-struct CacheEntry {
-    /// An encrypted transaction that has been found to be well-formed.
-    encrypted_tx: WellFormedEncryptedTx,
+#[derive(Clone)]
+enum CacheEntry {
+    MobTx {
+        /// An encrypted transaction that has been found to be well-formed.
+        encrypted_tx: WellFormedEncryptedTx,
 
-    /// Context exposed by the enclave about this transaction.
-    context: Arc<WellFormedTxContext>,
+        /// Context exposed by the enclave about this transaction.
+        context: Arc<WellFormedTxContext>,
+    },
+
+    #[allow(dead_code)]
+    SomethingElse { val: u64 },
 }
 
 impl CacheEntry {
-    pub fn encrypted_tx(&self) -> &WellFormedEncryptedTx {
+    /*pub fn encrypted_tx(&self) -> &WellFormedEncryptedTx {
         &self.encrypted_tx
     }
 
     pub fn context(&self) -> &Arc<WellFormedTxContext> {
         &self.context
+    }*/
+
+    pub fn tx_hash(&self) -> TxHash {
+        match self {
+            CacheEntry::MobTx { context, .. } => context.tx_hash().clone(),
+            CacheEntry::SomethingElse { .. } => {
+                todo!()
+            }
+        }
     }
 }
 
@@ -96,7 +111,7 @@ impl<E: ConsensusEnclave + Send, UI: UntrustedInterfaces + Send> TxManagerImpl<E
             highest_index_proofs,
         )?;
 
-        Ok(CacheEntry {
+        Ok(CacheEntry::MobTx {
             encrypted_tx: well_formed_encrypted_tx,
             context: Arc::new(well_formed_tx_context),
         })
@@ -104,6 +119,39 @@ impl<E: ConsensusEnclave + Send, UI: UntrustedInterfaces + Send> TxManagerImpl<E
 
     fn lock_cache(&self) -> MutexGuard<HashMap<TxHash, CacheEntry>> {
         self.cache.lock().expect("Lock poisoned")
+    }
+
+    fn get_cache_entries<'a, 'b, I>(
+        cache: &'a MutexGuard<HashMap<TxHash, CacheEntry>>,
+        tx_hashes: I,
+    ) -> Result<Vec<&'a CacheEntry>, TxManagerError>
+    where
+        I: Iterator<Item = &'b TxHash>,
+    {
+        // Split `tx_hashes` into a list of found hashes and missing ones. This allows
+        // us to return an error with the entire list of missing hashes.
+        let (entries, not_found) = tx_hashes
+            .map(|tx_hash| {
+                cache
+                    .get(tx_hash)
+                    .map_or_else(|| (*tx_hash, None), |entry| (*tx_hash, Some(entry)))
+            })
+            .partition::<Vec<_>, _>(|(_tx_hash, result)| result.is_some());
+
+        // If we are missing any hashes, return error.
+        if !not_found.is_empty() {
+            let not_found_tx_hashes = not_found
+                .into_iter()
+                .map(|(tx_hash, _)| tx_hash.clone())
+                .collect();
+            return Err(TxManagerError::NotInCache(not_found_tx_hashes));
+        }
+
+        // Otherwise, return the found entries.
+        Ok(entries
+            .into_iter()
+            .map(|(_tx_hash, entry)| entry.unwrap())
+            .collect())
     }
 }
 
@@ -119,7 +167,7 @@ impl<E: ConsensusEnclave + Send, UI: UntrustedInterfaces + Send> TxManager
             let cache = self.lock_cache();
             if let Some(entry) = cache.get(&tx_context.tx_hash) {
                 // The transaction is well-formed and is in the cache.
-                return Ok(*entry.context.tx_hash());
+                return Ok(entry.tx_hash());
             }
         }
 
@@ -152,11 +200,18 @@ impl<E: ConsensusEnclave + Send, UI: UntrustedInterfaces + Send> TxManager
         // find the expired entries and remove them, storing their keys in expired,
         // without destroying or re-allocating the cache
         cache.retain(|key, entry| -> bool {
-            if entry.context().tombstone_block() <= block_index {
-                expired.insert(*key);
-                false
-            } else {
-                true
+            match entry {
+                CacheEntry::MobTx { context, .. } => {
+                    if context.tombstone_block() <= block_index {
+                        expired.insert(*key);
+                        false
+                    } else {
+                        true
+                    }
+                }
+                CacheEntry::SomethingElse { .. } => {
+                    todo!()
+                }
             }
         });
 
@@ -185,22 +240,29 @@ impl<E: ConsensusEnclave + Send, UI: UntrustedInterfaces + Send> TxManager
     /// Validate the transaction corresponding to the given hash against the
     /// current ledger.
     fn validate(&self, tx_hash: &TxHash) -> TxManagerResult<()> {
-        let context_opt = {
+        let entry_opt = {
             let cache = self.lock_cache();
-            cache.get(tx_hash).map(|entry| entry.context.clone())
+            cache.get(tx_hash).cloned()
         };
 
-        if let Some(context) = context_opt {
-            let _timer = counters::VALIDATE_TX_TIME.start_timer();
-            self.untrusted.is_valid(context)?;
-            Ok(())
-        } else {
-            log::warn!(
-                self.logger,
-                "attempting to validate non-existent tx hash {:?}",
-                tx_hash
-            );
-            Err(TxManagerError::NotInCache(vec![*tx_hash]))
+        match entry_opt {
+            Some(CacheEntry::MobTx { context, .. }) => {
+                let _metrics_timer = counters::VALIDATE_TX_TIME.start_timer();
+
+                self.untrusted.is_valid(context)?;
+                Ok(())
+            }
+            Some(CacheEntry::SomethingElse { .. }) => {
+                todo!()
+            }
+            None => {
+                log::warn!(
+                    self.logger,
+                    "attempting to validate non-existent tx hash {:?}",
+                    tx_hash
+                );
+                Err(TxManagerError::NotInCache(vec![*tx_hash]))
+            }
         }
     }
 
@@ -208,38 +270,26 @@ impl<E: ConsensusEnclave + Send, UI: UntrustedInterfaces + Send> TxManager
     fn combine(&self, tx_hashes: &[TxHash]) -> TxManagerResult<Vec<TxHash>> {
         let tx_hashes: HashSet<&TxHash> = tx_hashes.iter().clone().collect(); // Dedup
 
-        let tx_contexts: TxManagerResult<Vec<Arc<WellFormedTxContext>>> = {
-            let cache = self.lock_cache();
+        let cache = self.lock_cache();
+        let cache_entries = Self::get_cache_entries(&cache, tx_hashes.iter().map(|tx_hash| *tx_hash))?;
 
-            // Split `tx_hashes` into a list of found hashes and missing ones. This allows
-            // us to return an error with the entire list of missing hashes.
-            let (entries, not_found) = tx_hashes
-                .iter()
-                .map(|tx_hash| {
-                    cache
-                        .get(tx_hash)
-                        .map_or_else(|| (*tx_hash, None), |entry| (*tx_hash, Some(entry)))
-                })
-                .partition::<Vec<_>, _>(|(_tx_hash, result)| result.is_some());
+        // Combine MobTx entries.
+        let tx_contexts: Vec<_> = cache_entries
+            .iter()
+            .filter_map(|entry| match entry {
+                CacheEntry::MobTx { context, .. } => Some(context.clone()),
+                CacheEntry::SomethingElse { .. } => None,
+            })
+            .collect();
 
-            // If we are missing any hashes, return error.
-            if !not_found.is_empty() {
-                let not_found_tx_hashes =
-                    not_found.into_iter().map(|(tx_hash, _)| *tx_hash).collect();
-                return Err(TxManagerError::NotInCache(not_found_tx_hashes));
-            }
-
-            // Collect tx contexts.
-            Ok(entries
-                .into_iter()
-                .map(|(_tx_hash, entry)| entry.unwrap().context().clone())
-                .collect())
-        };
-
-        // Perform the combine operation.
-        Ok(self
+        let combined_mob_tx_hashes = self
             .untrusted
-            .combine(&tx_contexts?, MAX_TRANSACTIONS_PER_BLOCK))
+            .combine(&tx_contexts, MAX_TRANSACTIONS_PER_BLOCK);
+
+        // TODO combine SomethingElse
+
+        // Return the final set of combined hashes
+        Ok(combined_mob_tx_hashes)
     }
 
     /// Forms a Block containing the transactions that correspond to the given
@@ -255,36 +305,28 @@ impl<E: ConsensusEnclave + Send, UI: UntrustedInterfaces + Send> TxManager
         parent_block: &Block,
     ) -> TxManagerResult<(Block, BlockContents, BlockSignature)> {
         let cache = self.lock_cache();
+        let cache_entries = Self::get_cache_entries(&cache, tx_hashes.iter())?;
 
-        // Split `tx_hashes` into a list of found hashes and missing ones. This allows
-        // us to return an error with the entire list of missing hashes.
-        let (entries, not_found) = tx_hashes
-            .iter()
-            .map(|tx_hash| {
-                cache
-                    .get(tx_hash)
-                    .map_or_else(|| (*tx_hash, None), |entry| (*tx_hash, Some(entry)))
-            })
-            .partition::<Vec<_>, _>(|(_tx_hash, result)| result.is_some());
-
-        // If we are missing any hashes, return error.
-        if !not_found.is_empty() {
-            let not_found_tx_hashes = not_found.into_iter().map(|(tx_hash, _)| tx_hash).collect();
-            return Err(TxManagerError::NotInCache(not_found_tx_hashes));
-        }
+        // TODO
+        let mob_tx_entries = cache_entries.into_iter().filter_map(|entry| match entry {
+            CacheEntry::MobTx {
+                context,
+                encrypted_tx,
+            } => Some((context.tx_hash().clone(), (context, encrypted_tx))),
+            _ => None,
+        });
 
         // Proceed with forming the block.
-        let encrypted_txs_with_proofs = entries
-            .into_iter()
-            .map(|(_tx_hash, entry)| {
-                let entry = entry.unwrap();
+        let encrypted_txs_with_proofs = mob_tx_entries
+            //.into_iter()
+            .map(|(_tx_hash, (context, encrypted_tx))| {
                 // Highest indices proofs must be w.r.t. the current ledger.
                 // Recreating them here is a crude way to ensure that.
                 let highest_index_proofs: Vec<_> = self
                     .untrusted
-                    .get_tx_out_proof_of_memberships(entry.context.highest_indices())?;
+                    .get_tx_out_proof_of_memberships(context.highest_indices())?;
 
-                Ok((entry.encrypted_tx().clone(), highest_index_proofs))
+                Ok((encrypted_tx.clone(), highest_index_proofs))
             })
             .collect::<Result<Vec<(WellFormedEncryptedTx, Vec<TxOutMembershipProof>)>, TxManagerError>>()?;
 
@@ -320,7 +362,14 @@ impl<E: ConsensusEnclave + Send, UI: UntrustedInterfaces + Send> TxManager
                 .map(|tx_hash| {
                     cache.get(tx_hash).map_or_else(
                         || (*tx_hash, None),
-                        |entry| (*tx_hash, Some(entry.encrypted_tx().clone())),
+                        |entry| match entry {
+                            CacheEntry::MobTx { encrypted_tx, .. } => {
+                                (*tx_hash, Some(encrypted_tx.clone()))
+                            }
+                            CacheEntry::SomethingElse { .. } => {
+                                todo!()
+                            }
+                        },
                     )
                 })
                 .partition::<Vec<_>, _>(|(_tx_hash, result)| result.is_some())
@@ -343,9 +392,12 @@ impl<E: ConsensusEnclave + Send, UI: UntrustedInterfaces + Send> TxManager
 
     /// Get the encrypted transaction corresponding to the given hash.
     fn get_encrypted_tx(&self, tx_hash: &TxHash) -> Option<WellFormedEncryptedTx> {
-        self.lock_cache()
-            .get(tx_hash)
-            .map(|entry| entry.encrypted_tx().clone())
+        self.lock_cache().get(tx_hash).map(|entry| match entry {
+            CacheEntry::MobTx { encrypted_tx, .. } => encrypted_tx.clone(),
+            CacheEntry::SomethingElse { .. } => {
+                todo!()
+            }
+        })
     }
 }
 
