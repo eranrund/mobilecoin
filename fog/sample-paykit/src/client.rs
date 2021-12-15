@@ -33,7 +33,7 @@ use mc_transaction_core::{
     onetime_keys::*,
     ring_signature::KeyImage,
     tx::{Tx, TxOut, TxOutMembershipProof},
-    BlockIndex,
+    BlockIndex, TokenId,
 };
 use mc_transaction_std::{
     ChangeDestination, InputCredentials, MemoType, NoMemoBuilder, RTHMemoBuilder,
@@ -576,10 +576,10 @@ fn build_transaction_helper<T: RngCore + CryptoRng, FPR: FogPubkeyResolver>(
         memo_builder.set_sender_credential(SenderMemoCredential::from(source_account_key));
         memo_builder.enable_destination_memo();
 
-        TransactionBuilder::new(fog_resolver, memo_builder)
+        TransactionBuilder::new(fog_resolver, memo_builder, TokenId::MOB)
     } else {
         let memo_builder = NoMemoBuilder::default();
-        TransactionBuilder::new(fog_resolver, memo_builder)
+        TransactionBuilder::new(fog_resolver, memo_builder, TokenId::MOB)
     };
     tx_builder.set_fee(fee)?;
 

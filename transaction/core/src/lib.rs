@@ -37,7 +37,7 @@ pub mod proptest_fixtures;
 pub use amount::{get_value_mask, Amount, AmountError, Commitment, CompressedCommitment};
 pub use blockchain::*;
 pub use memo::{EncryptedMemo, MemoError, MemoPayload};
-pub use tx::MemoContext;
+pub use tx::{MemoContext, TokenId};
 pub use tx_error::{NewMemoError, NewTxError};
 
 use core::convert::TryFrom;

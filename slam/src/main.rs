@@ -24,6 +24,7 @@ use mc_transaction_core::{
     onetime_keys::{recover_onetime_private_key, view_key_matches_output},
     ring_signature::KeyImage,
     tx::{Tx, TxOut, TxOutMembershipProof},
+    TokenId,
 };
 use mc_transaction_std::{InputCredentials, NoMemoBuilder, TransactionBuilder};
 use mc_util_uri::ConnectionUri;
@@ -497,7 +498,11 @@ fn build_tx(
     assert_eq!(utxos_with_proofs.len(), rings.len());
 
     // Create tx_builder. No fog reports.
-    let mut tx_builder = TransactionBuilder::new(FogResolver::default(), NoMemoBuilder::default());
+    let mut tx_builder = TransactionBuilder::new(
+        FogResolver::default(),
+        NoMemoBuilder::default(),
+        TokenId::MOB,
+    );
 
     tx_builder
         .set_fee(FEE.load(Ordering::SeqCst))

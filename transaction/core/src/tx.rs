@@ -11,7 +11,7 @@ use mc_crypto_keys::{CompressedRistrettoPublic, RistrettoPrivate, RistrettoPubli
 use mc_util_repr_bytes::{
     derive_prost_message_from_repr_bytes, typenum::U32, GenericArray, ReprBytes,
 };
-use prost::Message;
+use prost::{Enumeration, Message};
 use serde::{Deserialize, Serialize};
 
 use crate::{
@@ -98,6 +98,32 @@ impl fmt::Debug for TxHash {
     }
 }
 
+/// TODO
+#[derive(
+    Clone, Copy, Debug, Eq, Hash, PartialEq, Serialize, Deserialize, Enumeration, Digestible,
+)]
+pub enum TokenId {
+    MOB = 0,
+    Token1 = 1,
+    Token2 = 2,
+}
+
+impl TryFrom<i32> for TokenId {
+    type Error = ();
+
+    fn try_from(source: i32) -> Result<Self, Self::Error> {
+        if source == TokenId::MOB as i32 {
+            Ok(TokenId::MOB)
+        } else if source == TokenId::Token1 as i32 {
+            Ok(TokenId::Token1)
+        } else if source == TokenId::Token2 as i32 {
+            Ok(TokenId::Token2)
+        } else {
+            Err(())
+        }
+    }
+}
+
 /// A CryptoNote-style transaction.
 #[derive(Clone, Eq, PartialEq, Serialize, Deserialize, Message, Digestible)]
 pub struct Tx {
@@ -108,6 +134,10 @@ pub struct Tx {
     /// The transaction signature.
     #[prost(message, required, tag = "2")]
     pub signature: SignatureRctBulletproofs,
+
+    /// Token id for this transaction.
+    #[prost(enumeration = "TokenId", tag = "3")]
+    pub token_id: i32,
 }
 
 impl fmt::Display for Tx {
@@ -250,6 +280,10 @@ pub struct TxOut {
     /// The encrypted memo (except for old TxOut's, which don't have this.)
     #[prost(message, tag = "5")]
     pub e_memo: Option<EncryptedMemo>,
+
+    /// TODO
+    #[prost(enumeration = "TokenId", tag = "6")]
+    pub token_id: i32,
 }
 
 /// When creating a MemoPayload for a TxOut, sometimes it is important to be
@@ -287,10 +321,16 @@ impl TxOut {
         recipient: &PublicAddress,
         tx_private_key: &RistrettoPrivate,
         hint: EncryptedFogHint,
+        token_id: TokenId,
     ) -> Result<Self, AmountError> {
-        TxOut::new_with_memo(value, recipient, tx_private_key, hint, |_| {
-            Ok(Some(MemoPayload::default()))
-        })
+        TxOut::new_with_memo(
+            value,
+            recipient,
+            tx_private_key,
+            hint,
+            |_| Ok(Some(MemoPayload::default())),
+            token_id,
+        )
         .map_err(|err| match err {
             NewTxError::Amount(err) => err,
             // Memo error is unreachable because the memo_fn we passed is infallible
@@ -315,6 +355,7 @@ impl TxOut {
         tx_private_key: &RistrettoPrivate,
         hint: EncryptedFogHint,
         memo_fn: impl FnOnce(MemoContext) -> Result<Option<MemoPayload>, NewMemoError>,
+        token_id: TokenId,
     ) -> Result<Self, NewTxError> {
         let target_key = create_tx_out_target_key(tx_private_key, recipient).into();
         let public_key = create_tx_out_public_key(tx_private_key, recipient.spend_public_key());
@@ -335,6 +376,7 @@ impl TxOut {
             public_key: public_key.into(),
             e_fog_hint: hint,
             e_memo,
+            token_id: token_id as i32,
         })
     }
 

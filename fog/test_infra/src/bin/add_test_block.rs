@@ -37,7 +37,7 @@ use mc_transaction_core::{
     onetime_keys::recover_onetime_private_key,
     ring_signature::KeyImage,
     tx::{TxOut, TxOutMembershipElement, TxOutMembershipHash},
-    Block, BlockContents, BlockData, BlockSignature, BLOCK_VERSION,
+    Block, BlockContents, BlockData, BlockSignature, TokenId, BLOCK_VERSION,
 };
 use mc_util_from_random::FromRandom;
 use rand_core::SeedableRng;
@@ -169,6 +169,7 @@ fn main() {
             &account_keys[credit.account].default_subaddress(),
             &tx_private_key,
             e_fog_hint,
+            TokenId::MOB,
         )
         .expect("Could not create tx_out");
 

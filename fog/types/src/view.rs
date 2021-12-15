@@ -9,7 +9,7 @@ use mc_crypto_keys::{CompressedRistrettoPublic, KeyError, RistrettoPrivate, Rist
 use mc_transaction_core::{
     encrypted_fog_hint::{EncryptedFogHint, ENCRYPTED_FOG_HINT_LEN},
     tx::TxOut,
-    Amount, AmountError, EncryptedMemo, MemoError,
+    Amount, AmountError, EncryptedMemo, MemoError, TokenId,
 };
 use prost::Message;
 use serde::{Deserialize, Serialize};
@@ -203,6 +203,9 @@ pub struct TxOutRecord {
     /// The encrypted memo bytes of the TxOut
     #[prost(bytes, tag = "9")]
     pub tx_out_e_memo_data: Vec<u8>,
+
+    #[prost(enumeration = "TokenId", tag = "10")]
+    pub tx_out_token_id: i32,
 }
 
 impl TxOutRecord {
@@ -225,6 +228,7 @@ impl TxOutRecord {
                 .map(|e_memo| e_memo.into())
                 .unwrap_or_default(),
             tx_out_global_index: meta.global_index,
+            tx_out_token_id: fog_tx_out.token_id as i32,
             block_index: meta.block_index,
             timestamp: meta.timestamp,
         }
@@ -240,6 +244,8 @@ impl TxOutRecord {
             amount_masked_value: self.tx_out_amount_masked_value,
             amount_commitment_data_crc32: self.get_amount_data_crc32()?,
             e_memo: self.get_e_memo()?,
+            token_id: TokenId::try_from(self.tx_out_token_id)
+                .map_err(|_| FogTxOutError::TokenId(self.tx_out_token_id))?,
         })
     }
 
@@ -298,6 +304,9 @@ pub struct FogTxOut {
 
     /// The encrypted memo, if present
     pub e_memo: Option<EncryptedMemo>,
+
+    /// TODO what does this break?
+    pub token_id: TokenId,
 }
 
 // Convert a TxOut to a FogTxOut in the efficient way (omitting compressed
@@ -312,6 +321,7 @@ impl core::convert::From<&TxOut> for FogTxOut {
             amount_commitment_data_crc32: Crc::<u32>::new(&crc::CRC_32_ISO_HDLC)
                 .checksum(src.amount.commitment.point.as_bytes()),
             e_memo: src.e_memo,
+            token_id: TokenId::try_from(src.token_id).expect("TODO"),
         }
     }
 }
@@ -358,6 +368,7 @@ impl FogTxOut {
             public_key: self.public_key,
             e_fog_hint: EncryptedFogHint::from(&[0u8; ENCRYPTED_FOG_HINT_LEN]),
             e_memo: self.e_memo,
+            token_id: self.token_id as i32,
         })
     }
 }
@@ -373,6 +384,8 @@ pub enum FogTxOutError {
     Key(KeyError),
     /// An invalid memo: {0}
     Memo(MemoError),
+    /// An invalid token id: {0}
+    TokenId(i32),
 }
 
 impl From<AmountError> for FogTxOutError {

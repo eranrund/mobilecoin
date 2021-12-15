@@ -10,7 +10,7 @@ use mc_transaction_core::{
     onetime_keys::{recover_onetime_private_key, recover_public_subaddress_spend_key},
     ring_signature::KeyImage,
     tx::{TxOut, TxOutConfirmationNumber, TxOutMembershipProof},
-    Amount, CompressedCommitment,
+    Amount, CompressedCommitment, TokenId,
 };
 use mc_transaction_std::{InputCredentials, NoMemoBuilder, TransactionBuilder};
 use mc_util_ffi::*;
@@ -323,7 +323,8 @@ pub extern "C" fn mc_transaction_builder_create(
         // TODO: After servers are deployed that are supporting the memos,
         // Enable recoverable transaction history by configuring an RTHMemoBuilder
         let memo_builder = NoMemoBuilder::default();
-        let mut transaction_builder = TransactionBuilder::new(fog_resolver, memo_builder);
+        let mut transaction_builder =
+            TransactionBuilder::new(fog_resolver, memo_builder, TokenId::MOB); // TODO
         transaction_builder
             .set_fee(fee)
             .expect("failure not expected");

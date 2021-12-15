@@ -54,7 +54,7 @@ use mc_transaction_core::{
     ring_signature::{KeyImage, Scalar},
     tx::{Tx, TxOut, TxOutMembershipProof},
     validation::TransactionValidationError,
-    Amount, Block, BlockContents, BlockSignature, MemoPayload, BLOCK_VERSION,
+    Amount, Block, BlockContents, BlockSignature, MemoPayload, TokenId, BLOCK_VERSION,
 };
 use prost::Message;
 use rand_core::{CryptoRng, RngCore};
@@ -620,6 +620,7 @@ fn mint_aggregate_fee(
             public_key,
             e_fog_hint: Default::default(),
             e_memo,
+            token_id: TokenId::MOB as i32,
         }
     };
 

@@ -16,7 +16,7 @@ use mc_transaction_core::{
     fog_hint::FogHint,
     onetime_keys::create_shared_secret,
     ring_signature::SignatureRctBulletproofs,
-    tx::{Tx, TxIn, TxOut, TxOutConfirmationNumber, TxPrefix},
+    tx::{TokenId, Tx, TxIn, TxOut, TxOutConfirmationNumber, TxPrefix},
     CompressedCommitment, MemoContext, MemoPayload, NewMemoError,
 };
 use mc_util_from_random::FromRandom;
@@ -54,6 +54,8 @@ pub struct TransactionBuilder<FPR: FogPubkeyResolver> {
     /// types that SDKs must bind to if they support multiple memo builder
     /// types.
     memo_builder: Option<Box<dyn MemoBuilder + 'static + Send + Sync>>,
+    /// TODO
+    token_id: TokenId,
 }
 
 impl<FPR: FogPubkeyResolver> TransactionBuilder<FPR> {
@@ -67,8 +69,9 @@ impl<FPR: FogPubkeyResolver> TransactionBuilder<FPR> {
     pub fn new<MB: MemoBuilder + 'static + Send + Sync>(
         fog_resolver: FPR,
         memo_builder: MB,
+        token_id: TokenId,
     ) -> Self {
-        TransactionBuilder::new_with_box(fog_resolver, Box::new(memo_builder))
+        TransactionBuilder::new_with_box(fog_resolver, Box::new(memo_builder), token_id)
     }
 
     /// Initializes a new TransactionBuilder, using a Box<dyn MemoBuilder>
@@ -82,6 +85,7 @@ impl<FPR: FogPubkeyResolver> TransactionBuilder<FPR> {
     pub fn new_with_box(
         fog_resolver: FPR,
         memo_builder: Box<dyn MemoBuilder + Send + Sync>,
+        token_id: TokenId,
     ) -> Self {
         TransactionBuilder {
             input_credentials: Vec::new(),
@@ -91,6 +95,7 @@ impl<FPR: FogPubkeyResolver> TransactionBuilder<FPR> {
             fog_resolver,
             fog_tombstone_block_limit: u64::max_value(),
             memo_builder: Some(memo_builder),
+            token_id,
         }
     }
 
@@ -100,6 +105,15 @@ impl<FPR: FogPubkeyResolver> TransactionBuilder<FPR> {
     /// * `input_credentials` - Credentials required to construct a ring
     ///   signature for an input.
     pub fn add_input(&mut self, input_credentials: InputCredentials) {
+        if input_credentials
+            .ring
+            .iter()
+            .any(|tx_out| tx_out.token_id != self.token_id as i32)
+        {
+            // TODO
+            panic!("input_credentials.ring must be all the same token_id");
+        }
+
         self.input_credentials.push(input_credentials);
     }
 
@@ -218,7 +232,7 @@ impl<FPR: FogPubkeyResolver> TransactionBuilder<FPR> {
     ) -> Result<(TxOut, TxOutConfirmationNumber), TxBuilderError> {
         let (hint, pubkey_expiry) = create_fog_hint(fog_hint_address, &self.fog_resolver, rng)?;
         let (tx_out, shared_secret) =
-            create_output_with_fog_hint(value, recipient, hint, memo_fn, rng)?;
+            create_output_with_fog_hint(value, recipient, hint, memo_fn, self.token_id, rng)?;
 
         self.impose_tombstone_block_limit(pubkey_expiry);
 
@@ -362,6 +376,7 @@ impl<FPR: FogPubkeyResolver> TransactionBuilder<FPR> {
         Ok(Tx {
             prefix: tx_prefix,
             signature,
+            token_id: self.token_id as i32,
         })
     }
 }
@@ -380,10 +395,11 @@ fn create_output_with_fog_hint<RNG: CryptoRng + RngCore>(
     recipient: &PublicAddress,
     fog_hint: EncryptedFogHint,
     memo_fn: impl FnOnce(MemoContext) -> Result<Option<MemoPayload>, NewMemoError>,
+    token_id: TokenId,
     rng: &mut RNG,
 ) -> Result<(TxOut, RistrettoPublic), TxBuilderError> {
     let private_key = RistrettoPrivate::from_random(rng);
-    let tx_out = TxOut::new_with_memo(value, recipient, &private_key, fog_hint, memo_fn)?;
+    let tx_out = TxOut::new_with_memo(value, recipient, &private_key, fog_hint, memo_fn, token_id)?;
     let shared_secret = create_shared_secret(recipient.view_public_key(), &private_key);
     Ok((tx_out, shared_secret))
 }

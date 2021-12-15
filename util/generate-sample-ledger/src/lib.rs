@@ -9,7 +9,7 @@ use mc_transaction_core::{
     encrypted_fog_hint::{EncryptedFogHint, ENCRYPTED_FOG_HINT_LEN},
     ring_signature::KeyImage,
     tx::TxOut,
-    Block, BlockContents, BLOCK_VERSION,
+    Block, BlockContents, TokenId, BLOCK_VERSION,
 };
 use mc_util_from_random::FromRandom;
 use rand::{RngCore, SeedableRng};
@@ -136,7 +136,7 @@ fn create_output(
         EncryptedFogHint::fake_onetime_hint(rng)
     };
 
-    let mut output = TxOut::new(value, recipient, &tx_private_key, hint).unwrap();
+    let mut output = TxOut::new(value, recipient, &tx_private_key, hint, TokenId::MOB).unwrap();
     // At this point, we clear the e_memo field, because, historically the genesis
     // block did not have memo fields, even though they are expected now.
     output.e_memo = None;

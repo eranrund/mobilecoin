@@ -21,7 +21,7 @@ use mc_transaction_core::{
     onetime_keys::recover_onetime_private_key,
     ring_signature::KeyImage,
     tx::{Tx, TxOut, TxOutConfirmationNumber, TxOutMembershipProof},
-    BlockIndex,
+    BlockIndex, TokenId,
 };
 use mc_transaction_std::{ChangeDestination, InputCredentials, NoMemoBuilder, TransactionBuilder};
 use mc_util_uri::FogUri;
@@ -770,7 +770,8 @@ impl<T: BlockchainConnection + UserTxConnection + 'static, FPR: FogPubkeyResolve
         };
 
         // Create tx_builder.
-        let mut tx_builder = TransactionBuilder::new(fog_resolver, NoMemoBuilder::default());
+        let mut tx_builder =
+            TransactionBuilder::new(fog_resolver, NoMemoBuilder::default(), TokenId::MOB);
 
         tx_builder
             .set_fee(fee)

@@ -24,6 +24,7 @@ use mc_transaction_core::{
     ring_signature::KeyImage,
     tx::{Tx, TxOut, TxOutMembershipProof},
     validation::TransactionValidationError,
+    TokenId,
 };
 use mc_transaction_std::{EmptyMemoBuilder, InputCredentials, TransactionBuilder};
 use mc_util_uri::FogUri;
@@ -497,7 +498,8 @@ fn build_tx(
     assert_eq!(utxos_with_proofs.len(), rings.len());
 
     // Create tx_builder.
-    let mut tx_builder = TransactionBuilder::new(fog_resolver, EmptyMemoBuilder::default());
+    let mut tx_builder =
+        TransactionBuilder::new(fog_resolver, EmptyMemoBuilder::default(), TokenId::MOB);
 
     tx_builder.set_fee(FEE.load(Ordering::SeqCst)).unwrap();
 

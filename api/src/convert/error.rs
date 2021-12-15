@@ -17,6 +17,7 @@ pub enum ConversionError {
     ObjectMissing,
     InvalidSignature,
     InvalidContents,
+    InvalidTokenId,
     Other,
 }
 

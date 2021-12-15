@@ -14,7 +14,7 @@ pub use mc_transaction_core::{
     tx::{Tx, TxOut, TxOutMembershipElement, TxOutMembershipHash},
     Block, BlockID, BlockIndex, BLOCK_VERSION,
 };
-use mc_transaction_core::{constants::RING_SIZE, membership_proofs::Range, BlockContents};
+use mc_transaction_core::{constants::RING_SIZE, membership_proofs::Range, BlockContents, TokenId};
 use mc_transaction_std::{EmptyMemoBuilder, InputCredentials, TransactionBuilder};
 use mc_util_from_random::FromRandom;
 use rand::{seq::SliceRandom, Rng};
@@ -87,8 +87,11 @@ pub fn create_transaction_with_amount<L: Ledger, R: RngCore + CryptoRng>(
     tombstone_block: BlockIndex,
     rng: &mut R,
 ) -> Tx {
-    let mut transaction_builder =
-        TransactionBuilder::new(MockFogResolver::default(), EmptyMemoBuilder::default());
+    let mut transaction_builder = TransactionBuilder::new(
+        MockFogResolver::default(),
+        EmptyMemoBuilder::default(),
+        TokenId::MOB,
+    );
 
     // The first transaction in the origin block should contain enough outputs to
     // use as mixins.
@@ -209,6 +212,7 @@ pub fn initialize_ledger<L: Ledger, R: RngCore + CryptoRng>(
                             &account_key.default_subaddress(),
                             &RistrettoPrivate::from_random(rng),
                             Default::default(),
+                            TokenId::MOB,
                         )
                         .expect("Could not create origin block TxOut");
                         // The origin block did not historically have memo fields
@@ -301,6 +305,7 @@ pub fn get_outputs<T: RngCore + CryptoRng>(
                 recipient,
                 &RistrettoPrivate::from_random(rng),
                 Default::default(),
+                TokenId::MOB,
             )
             .unwrap()
         })
