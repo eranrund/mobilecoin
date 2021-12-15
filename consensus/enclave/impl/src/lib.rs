@@ -34,7 +34,7 @@ use mc_attest_enclave_api::{
 use mc_attest_trusted::SealAlgo;
 use mc_common::{
     logger::{log, Logger},
-    ResponderId,
+    HashMap, ResponderId,
 };
 use mc_consensus_enclave_api::{
     ConsensusEnclave, Error, FeePublicKey, LocallyEncryptedTx, Result, SealedBlockSigningKey,
@@ -54,7 +54,7 @@ use mc_transaction_core::{
     ring_signature::{KeyImage, Scalar},
     tx::{Tx, TxOut, TxOutMembershipProof},
     validation::TransactionValidationError,
-    Amount, Block, BlockContents, BlockSignature, MemoPayload, TokenId, BLOCK_VERSION,
+    Amount, Block, BlockContents, BlockSignature, MemoPayload, BLOCK_VERSION,
 };
 use prost::Message;
 use rand_core::{CryptoRng, RngCore};
@@ -529,43 +529,54 @@ impl ConsensusEnclave for SgxConsensusEnclave {
             }
         }
 
-        // Create an aggregate fee output.
-        let fee_tx_private_key = {
-            let mut hash_value = [0u8; 32];
-            {
-                let mut transcript =
-                    MerlinTranscript::new(FEES_OUTPUT_PRIVATE_KEY_DOMAIN_TAG.as_bytes());
-                parent_block
-                    .id
-                    .append_to_transcript(b"parent_block_id", &mut transcript);
-                transactions.append_to_transcript(b"transactions", &mut transcript);
-                transcript.extract_digest(&mut hash_value);
-            };
-
-            // This private key is generated from the hash of all transactions in this
-            // block. This ensures that all nodes generate the same fee output
-            // transaction.
-            RistrettoPrivate::from(Scalar::from_bytes_mod_order(hash_value))
-        };
-
-        let total_fee: u64 = transactions.iter().map(|tx| tx.prefix.fee).sum();
-        let fee_public_key = self.get_fee_recipient().map_err(|e| {
-            Error::FeePublicAddress(format!("Could not get fee public address: {:?}", e))
-        })?;
-        let fee_recipient = PublicAddress::new(
-            &fee_public_key.spend_public_key,
-            &fee_public_key.view_public_key,
-        );
-
-        let fee_output = mint_aggregate_fee(&fee_recipient, &fee_tx_private_key, total_fee)?;
-
         let mut outputs: Vec<TxOut> = Vec::new();
         let mut key_images: Vec<KeyImage> = Vec::new();
         for tx in &transactions {
             outputs.extend(tx.prefix.outputs.iter().cloned());
             key_images.extend(tx.key_images().iter().cloned());
         }
-        outputs.push(fee_output);
+
+        // TODO
+        // Collect total fee amount per token id
+        let mut fees_by_token_id = HashMap::<i32, u64>::default();
+        for tx in &transactions {
+            *fees_by_token_id.entry(tx.token_id).or_insert(0) += tx.prefix.fee;
+        }
+
+        // Create fee output per token id
+        for (token_id, total_fee) in fees_by_token_id.into_iter() {
+            // Create an aggregate fee output.
+            let fee_tx_private_key = {
+                let mut hash_value = [0u8; 32];
+                {
+                    let mut transcript =
+                        MerlinTranscript::new(FEES_OUTPUT_PRIVATE_KEY_DOMAIN_TAG.as_bytes());
+                    parent_block
+                        .id
+                        .append_to_transcript(b"parent_block_id", &mut transcript);
+                    transactions.append_to_transcript(b"transactions", &mut transcript);
+                    token_id.append_to_transcript(b"token_id", &mut transcript);
+                    transcript.extract_digest(&mut hash_value);
+                };
+
+                // This private key is generated from the hash of all transactions in this
+                // block. This ensures that all nodes generate the same fee output
+                // transaction.
+                RistrettoPrivate::from(Scalar::from_bytes_mod_order(hash_value))
+            };
+
+            let fee_public_key = self.get_fee_recipient().map_err(|e| {
+                Error::FeePublicAddress(format!("Could not get fee public address: {:?}", e))
+            })?;
+            let fee_recipient = PublicAddress::new(
+                &fee_public_key.spend_public_key,
+                &fee_public_key.view_public_key,
+            );
+
+            let fee_output =
+                mint_aggregate_fee(&fee_recipient, &fee_tx_private_key, total_fee, token_id)?;
+            outputs.push(fee_output);
+        }
 
         // Sort outputs and key images. This removes ordering information which could be
         // used to infer the per-transaction relationships among outputs and/or
@@ -599,6 +610,7 @@ fn mint_aggregate_fee(
     fee_recipient: &PublicAddress,
     tx_private_key: &RistrettoPrivate,
     total_fee: u64,
+    token_id: i32,
 ) -> Result<TxOut> {
     // Create a single TxOut
     let fee_output: TxOut = {
@@ -620,7 +632,7 @@ fn mint_aggregate_fee(
             public_key,
             e_fog_hint: Default::default(),
             e_memo,
-            token_id: TokenId::MOB as i32,
+            token_id,
         }
     };
 
