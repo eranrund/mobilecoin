@@ -125,6 +125,12 @@ pub enum TransactionValidationError {
 
     /// A TxOut is missing the required memo field
     MissingMemo,
+
+    /// TODO
+    InvalidTokenId,
+
+    /// TODO
+    InconsistentTokenId,
 }
 
 impl From<mc_crypto_keys::KeyError> for TransactionValidationError {

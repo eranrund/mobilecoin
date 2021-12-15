@@ -63,6 +63,8 @@ impl From<TransactionValidationError> for ProposeTxResult {
             TransactionValidationError::KeyError => Self::KeyError,
             TransactionValidationError::UnsortedInputs => Self::UnsortedInputs,
             TransactionValidationError::MissingMemo => Self::MissingMemo,
+            TransactionValidationError::InvalidTokenId => Self::InvalidTokenId,
+            TransactionValidationError::InconsistentTokenId => Self::InconsistentTokenId,
         }
     }
 }
@@ -125,6 +127,8 @@ impl TryInto<TransactionValidationError> for ProposeTxResult {
             Self::KeyError => Ok(TransactionValidationError::KeyError),
             Self::UnsortedInputs => Ok(TransactionValidationError::UnsortedInputs),
             Self::MissingMemo => Ok(TransactionValidationError::MissingMemo),
+            Self::InvalidTokenId => Ok(TransactionValidationError::InvalidTokenId),
+            Self::InconsistentTokenId => Ok(TransactionValidationError::InconsistentTokenId),
         }
     }
 }

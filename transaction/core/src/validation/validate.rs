@@ -11,8 +11,9 @@ use crate::{
     constants::*,
     membership_proofs::{derive_proof_at_index, is_membership_proof_valid},
     tx::{Tx, TxOut, TxOutMembershipProof, TxPrefix},
-    CompressedCommitment,
+    CompressedCommitment, TokenId,
 };
+use core::convert::TryFrom;
 use mc_common::HashSet;
 use mc_crypto_keys::CompressedRistrettoPublic;
 use rand_core::{CryptoRng, RngCore};
@@ -34,6 +35,8 @@ pub fn validate<R: RngCore + CryptoRng>(
     minimum_fee: u64,
     csprng: &mut R,
 ) -> TransactionValidationResult<()> {
+    validate_token_id(&tx.prefix, tx.token_id)?;
+
     validate_number_of_inputs(&tx.prefix, MAX_INPUTS)?;
 
     validate_number_of_outputs(&tx.prefix, MAX_OUTPUTS)?;
@@ -64,6 +67,27 @@ pub fn validate<R: RngCore + CryptoRng>(
 
     // Note: The transaction must not contain a Key Image that has previously been
     // spent. This must be checked outside the enclave.
+
+    Ok(())
+}
+
+/// TODO
+fn validate_token_id(tx_prefix: &TxPrefix, token_id: i32) -> TransactionValidationResult<()> {
+    let _ = TokenId::try_from(token_id).map_err(|_| TransactionValidationError::InvalidTokenId)?;
+
+    for input in tx_prefix.inputs.iter() {
+        if input.ring.iter().any(|tx_out| tx_out.token_id != token_id) {
+            return Err(TransactionValidationError::InconsistentTokenId);
+        }
+    }
+
+    if tx_prefix
+        .outputs
+        .iter()
+        .any(|tx_out| tx_out.token_id != token_id)
+    {
+        return Err(TransactionValidationError::InconsistentTokenId);
+    }
 
     Ok(())
 }
