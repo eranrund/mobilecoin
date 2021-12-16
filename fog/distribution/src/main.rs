@@ -175,7 +175,7 @@ fn main() {
         for (index, tx_out) in transactions.iter().enumerate().skip(config.start_offset) {
             // Makes strong assumption about bootstrapped ledger layout
             if num_per_account_processed >= num_transactions_per_account {
-                log::trace!(
+                log::info!(
                     logger,
                     "Moving on to next account {:?} at tx index {:?}",
                     account_index + 1,
@@ -202,7 +202,7 @@ fn main() {
                     .get_value(&shared_secret)
                     .expect("Malformed amount");
 
-                log::trace!(
+                log::info!(
                     logger,
                     "(account = {:?}) and (tx_index {:?}) = {}",
                     account_index,
@@ -348,7 +348,7 @@ fn worker_thread_entry(
     loop {
         let mut pending_spendable_txouts = Vec::<SpendableTxOut>::new();
         while pending_spendable_txouts.len() < config.num_inputs {
-            log::trace!(
+            log::info!(
                 logger,
                 "Waiting for {} more inputs",
                 config.num_inputs - pending_spendable_txouts.len()
@@ -357,7 +357,7 @@ fn worker_thread_entry(
             match spendable_txouts_receiver.try_recv() {
                 Ok(tx_out) => pending_spendable_txouts.push(tx_out),
                 Err(_) => {
-                    log::debug!(logger, "No more inputs kill thread");
+                    log::info!(logger, "No more inputs kill thread");
 
                     running_threads_sender.send(1).unwrap();
                     return;
@@ -399,7 +399,7 @@ fn worker_thread_entry(
                 // fresh fog
                 fog_resolver = build_fog_resolver(&fog_uri, &env, &logger);
             }
-            log::trace!(logger, "rebuilding failed tx");
+            log::info!(logger, "rebuilding failed tx");
         }
     }
 }
@@ -418,7 +418,7 @@ fn submit_tx(
         // Submit to a node in round robin fashion, starting with a random node
         let node_index = (i + counter) % conns.len();
         let conn = &conns[node_index];
-        log::debug!(
+        log::info!(
             logger,
             "Submitting transaction {} to node {} (attempt {} / {})",
             counter,
@@ -429,7 +429,7 @@ fn submit_tx(
         thread::sleep(Duration::from_millis(config.add_tx_delay_ms));
         match conn.propose_tx(tx, empty()) {
             Ok(block_height) => {
-                log::debug!(
+                log::info!(
                     logger,
                     "Successfully submitted {:?}, at block height {:?} (attempt {} / {})",
                     counter,
@@ -689,7 +689,7 @@ fn get_num_transactions_per_account(
         // Make sure the viewkey matches for this output that we are about to send
         // Assume accounts are numbered in order that they were processed by bootstrap
         if !view_key_matches_output(&account.view_key(), &target_key, &public_key) {
-            log::trace!(
+            log::info!(
                 logger,
                 "Transaction {:?} does not belong to account. Total txs per account = {:?}",
                 i,
