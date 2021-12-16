@@ -7,7 +7,7 @@ use mc_crypto_keys::{CompressedRistrettoPublic, RistrettoPrivate};
 use mc_transaction_core::{
     ring_signature::KeyImage,
     tx::{TxOut, TxOutMembershipElement, TxOutMembershipProof},
-    Block, BlockContents, BlockData, BlockID, BlockSignature, BLOCK_VERSION, TokenId,
+    Block, BlockContents, BlockData, BlockID, BlockSignature, TokenId, BLOCK_VERSION,
 };
 use mc_util_from_random::FromRandom;
 use rand::{rngs::StdRng, SeedableRng};

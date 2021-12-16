@@ -39,14 +39,19 @@ pub const TX_OUT_INDEX_BY_HASH_DB_NAME: &str = "tx_out_store:tx_out_index_by_has
 pub const TX_OUT_INDEX_BY_PUBLIC_KEY_DB_NAME: &str = "tx_out_store:tx_out_index_by_public_key";
 pub const TX_OUT_BY_INDEX_DB_NAME: &str = "tx_out_store:tx_out_by_index";
 pub const MERKLE_HASH_BY_RANGE_DB_NAME: &str = "tx_out_store:merkle_hash_by_range";
+pub const TX_OUT_INDEX_BY_TOKEN_ID_AND_INDEX_DB_NAME: &str =
+    "tx_out_store:tx_out_index_by_token_id_and_index";
 
 // Keys used by the `counts` database.
 pub const NUM_TX_OUTS_KEY: &str = "num_tx_outs";
+pub const NUM_TX_OUTS_BY_TOKEN_ID_KEY: &str = "num_tx_outs_by_token_id";
 
 #[derive(Clone)]
 pub struct TxOutStore {
     /// Aggregate counts
     /// * `NUM_TX_OUTS_KEY` --> Number (u64) of TxOuts in the ledger.
+    /// * `NUM_TX_OUTS_BY_TOKEN_ID_KEY:{token_id}` --> Number (u64) of TxOuts in
+    ///   the ledger for a given token ID.
     counts: Database,
 
     /// TxOut by index. `key_bytes_to_u64(index) -> encode(&tx_out)`
@@ -57,6 +62,9 @@ pub struct TxOutStore {
 
     /// `tx_out.public_key -> u64_to_key_bytes(index)`
     tx_out_index_by_public_key: Database,
+
+    /// (token_id, index) -> u64_to_key_bytes(index)
+    tx_out_index_by_token_id_and_index: Database,
 
     /// Merkle hashes of subtrees. Range -> Merkle Hash of subtree containing
     /// TxOuts with indices in `[range.from, range.to]`. range.to_key_bytes
@@ -77,6 +85,8 @@ impl TxOutStore {
             tx_out_index_by_hash: env.open_db(Some(TX_OUT_INDEX_BY_HASH_DB_NAME))?,
             tx_out_index_by_public_key: env.open_db(Some(TX_OUT_INDEX_BY_PUBLIC_KEY_DB_NAME))?,
             tx_out_by_index: env.open_db(Some(TX_OUT_BY_INDEX_DB_NAME))?,
+            tx_out_index_by_token_id_and_index: env
+                .open_db(Some(TX_OUT_INDEX_BY_TOKEN_ID_AND_INDEX_DB_NAME))?,
             merkle_hashes: env.open_db(Some(MERKLE_HASH_BY_RANGE_DB_NAME))?,
         })
     }
@@ -90,6 +100,10 @@ impl TxOutStore {
             DatabaseFlags::empty(),
         )?;
         env.create_db(Some(TX_OUT_BY_INDEX_DB_NAME), DatabaseFlags::empty())?;
+        env.create_db(
+            Some(TX_OUT_INDEX_BY_TOKEN_ID_AND_INDEX_DB_NAME),
+            DatabaseFlags::empty(),
+        )?;
         env.create_db(Some(MERKLE_HASH_BY_RANGE_DB_NAME), DatabaseFlags::empty())?;
 
         let mut db_transaction = env.begin_rw_txn()?;
@@ -108,7 +122,7 @@ impl TxOutStore {
     /// Appends a TxOut to the end of the collection.
     /// Returns the index of the TxOut in the ledger, or an Error.
     pub fn push(&self, tx_out: &TxOut, db_transaction: &mut RwTransaction) -> Result<u64, Error> {
-        let num_tx_outs: u64 = key_bytes_to_u64(db_transaction.get(self.counts, &NUM_TX_OUTS_KEY)?);
+        let num_tx_outs = self.num_tx_outs(db_transaction)?;
         let index: u64 = num_tx_outs;
 
         db_transaction.put(
@@ -143,6 +157,25 @@ impl TxOutStore {
 
         self.update_merkle_hashes(index, db_transaction)?;
 
+        // Update per-token count
+        let num_tx_outs_by_token_id =
+            self.num_tx_outs_by_token_id(tx_out.token_id, db_transaction)?;
+        db_transaction.put(
+            self.counts,
+            &format!("{}:{}", NUM_TX_OUTS_BY_TOKEN_ID_KEY, tx_out.token_id),
+            &u64_to_key_bytes(num_tx_outs_by_token_id + 1_u64),
+            WriteFlags::empty(),
+        )?;
+
+        // Update per-token index map
+        let key = token_id_and_index_key(tx_out.token_id, num_tx_outs_by_token_id);
+        db_transaction.put(
+            self.tx_out_index_by_token_id_and_index,
+            &key,
+            &u64_to_key_bytes(index),
+            WriteFlags::NO_OVERWRITE,
+        )?;
+
         Ok(index)
     }
 
@@ -151,6 +184,22 @@ impl TxOutStore {
         Ok(key_bytes_to_u64(
             db_transaction.get(self.counts, &NUM_TX_OUTS_KEY)?,
         ))
+    }
+
+    /// Get the total number of TxOuts of a given token id in the ledger.
+    pub fn num_tx_outs_by_token_id<T: Transaction>(
+        &self,
+        token_id: i32,
+        db_transaction: &T,
+    ) -> Result<u64, Error> {
+        match db_transaction.get(
+            self.counts,
+            &format!("{}:{}", NUM_TX_OUTS_BY_TOKEN_ID_KEY, token_id),
+        ) {
+            Ok(db_bytes) => Ok(key_bytes_to_u64(db_bytes)),
+            Err(lmdb::Error::NotFound) => Ok(0),
+            Err(err) => Err(err.into()),
+        }
     }
 
     /// Returns the index of the TxOut with the given hash.
@@ -182,6 +231,22 @@ impl TxOutStore {
         let tx_out_bytes = db_transaction.get(self.tx_out_by_index, &u64_to_key_bytes(index))?;
         let tx_out: TxOut = decode(tx_out_bytes)?;
         Ok(tx_out)
+    }
+
+    /// Gets a TxOut by its index, filtering by a to
+    pub fn get_tx_out_by_token_id_and_index<T: Transaction>(
+        &self,
+        token_id: i32,
+        index: u64,
+        db_transaction: &T,
+    ) -> Result<(TxOut, u64), Error> {
+        let key = token_id_and_index_key(token_id, index);
+        let index_bytes = db_transaction.get(self.tx_out_index_by_token_id_and_index, &key)?;
+        let absolute_index = key_bytes_to_u64(index_bytes);
+        Ok((
+            self.get_tx_out_by_index(absolute_index, db_transaction)?,
+            absolute_index,
+        ))
     }
 
     /// Get the root hash of the Merkle Tree
@@ -411,6 +476,14 @@ fn containing_range(index: u64, depth: u32) -> (u64, u64) {
     let high: u64 = index | mask;
 
     (low, high)
+}
+
+/// TODO
+fn token_id_and_index_key(token_id: i32, index: u64) -> Vec<u8> {
+    let mut key = vec![];
+    key.extend_from_slice(&token_id.to_be_bytes());
+    key.extend_from_slice(&index.to_be_bytes());
+    key
 }
 
 #[cfg(test)]

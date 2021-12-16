@@ -42,6 +42,9 @@ pub trait Ledger: Send {
     /// Get the total number of TxOuts in the ledger.
     fn num_txos(&self) -> Result<u64, Error>;
 
+    /// Get the total number of TxOuts in the ledger, by token id.
+    fn num_txos_by_token_id(&self, token_id: i32) -> Result<u64, Error>;
+
     /// Returns the index of the TxOut with the given hash.
     fn get_tx_out_index_by_hash(&self, tx_out_hash: &Hash) -> Result<u64, Error>;
 
@@ -53,6 +56,13 @@ pub trait Ledger: Send {
 
     /// Gets a TxOut by its index in the ledger.
     fn get_tx_out_by_index(&self, index: u64) -> Result<TxOut, Error>;
+
+    /// TODO
+    fn get_tx_out_by_token_id_and_index(
+        &self,
+        token_id: i32,
+        index: u64,
+    ) -> Result<(TxOut, u64), Error>;
 
     /// Gets a proof of memberships for TxOuts with indexes `indexes`.
     fn get_tx_out_proof_of_memberships(

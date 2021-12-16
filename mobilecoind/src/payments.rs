@@ -672,7 +672,7 @@ impl<T: BlockchainConnection + UserTxConnection + 'static, FPR: FogPubkeyResolve
         excluded_tx_out_indices: &[u64],
     ) -> Result<Vec<Vec<(TxOut, TxOutMembershipProof)>>, Error> {
         let num_requested = ring_size * num_rings;
-        let num_txos = self.ledger_db.num_txos()?;
+        let num_txos = self.ledger_db.num_txos_by_token_id(self.token_id)?;
 
         // Check that the ledger contains enough tx outs.
         if excluded_tx_out_indices.len() as u64 > num_txos {
@@ -700,15 +700,20 @@ impl<T: BlockchainConnection + UserTxConnection + 'static, FPR: FogPubkeyResolve
             samples.into_iter().collect()
         };
 
-        let mixins_result: Result<Vec<TxOut>, _> = mixin_indices
-            .iter()
-            .map(|&index| self.ledger_db.get_tx_out_by_index(index))
-            .collect();
-        let mixins: Vec<TxOut> = mixins_result?;
+        let mut mixins = Vec::<TxOut>::new();
+        let mut mixin_absolute_indices = Vec::<u64>::new();
+
+        for mixin_index in mixin_indices {
+            let (tx_out, abs_index) = self
+                .ledger_db
+                .get_tx_out_by_token_id_and_index(self.token_id, mixin_index)?;
+            mixins.push(tx_out);
+            mixin_absolute_indices.push(abs_index);
+        }
 
         let membership_proofs = self
             .ledger_db
-            .get_tx_out_proof_of_memberships(&mixin_indices)?;
+            .get_tx_out_proof_of_memberships(&mixin_absolute_indices)?;
 
         let mixins_with_proofs: Vec<(TxOut, TxOutMembershipProof)> = mixins
             .into_iter()
@@ -780,7 +785,11 @@ impl<T: BlockchainConnection + UserTxConnection + 'static, FPR: FogPubkeyResolve
         };
 
         // Create tx_builder.
-        let mut tx_builder = TransactionBuilder::new(fog_resolver, NoMemoBuilder::default(), TokenId::try_from(token_id).map_err(|_| Error::TxBuild("Invalid token id".into()))?);
+        let mut tx_builder = TransactionBuilder::new(
+            fog_resolver,
+            NoMemoBuilder::default(),
+            TokenId::try_from(token_id).map_err(|_| Error::TxBuild("Invalid token id".into()))?,
+        );
 
         tx_builder
             .set_fee(fee)

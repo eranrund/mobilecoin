@@ -222,6 +222,13 @@ impl Ledger for LedgerDB {
         self.tx_out_store.num_tx_outs(&db_transaction)
     }
 
+    /// Get the total number of TxOuts in the ledger, by token id.
+    fn num_txos_by_token_id(&self, token_id: i32) -> Result<u64, Error> {
+        let db_transaction = self.env.begin_ro_txn()?;
+        self.tx_out_store
+            .num_tx_outs_by_token_id(token_id, &db_transaction)
+    }
+
     /// Gets a Block by its index in the blockchain.
     fn get_block(&self, block_number: u64) -> Result<Block, Error> {
         let db_transaction = self.env.begin_ro_txn()?;
@@ -288,6 +295,17 @@ impl Ledger for LedgerDB {
             .get_tx_out_by_index(index, &db_transaction)
     }
 
+    /// TODO
+    fn get_tx_out_by_token_id_and_index(
+        &self,
+        token_id: i32,
+        index: u64,
+    ) -> Result<(TxOut, u64), Error> {
+        let db_transaction = self.env.begin_ro_txn()?;
+        self.tx_out_store
+            .get_tx_out_by_token_id_and_index(token_id, index, &db_transaction)
+    }
+
     /// Returns true if the Ledger contains the given TxOut public key.
     fn contains_tx_out_public_key(
         &self,
@@ -348,7 +366,7 @@ impl LedgerDB {
     #[allow(clippy::unreadable_literal)]
     pub fn open(path: &Path) -> Result<LedgerDB, Error> {
         let env = Environment::new()
-            .set_max_dbs(22)
+            .set_max_dbs(23)
             .set_map_size(MAX_LMDB_FILE_SIZE)
             // TODO - needed because currently our test cloud machines have slow disks.
             .set_flags(EnvironmentFlags::NO_SYNC)
@@ -398,7 +416,7 @@ impl LedgerDB {
     /// Creates a fresh Ledger Database in the given path.
     pub fn create(path: &Path) -> Result<(), Error> {
         let env = Environment::new()
-            .set_max_dbs(22)
+            .set_max_dbs(23)
             .set_map_size(MAX_LMDB_FILE_SIZE)
             .open(path)?;
 
