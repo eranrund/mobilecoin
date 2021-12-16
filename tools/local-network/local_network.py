@@ -289,11 +289,12 @@ class Node:
 
 
 class Mobilecoind:
-    def __init__(self, client_port):
+    def __init__(self, client_port, token_id=0):
         self.client_port = client_port
-        self.ledger_db = os.path.join(WORK_DIR, 'mobilecoind-ledger-db')
-        self.mobilecoind_db = os.path.join(WORK_DIR, 'mobilecoind-db')
-        self.watcher_db = os.path.join(WORK_DIR, 'watcher-db')
+        self.token_id = token_id
+        self.ledger_db = os.path.join(WORK_DIR, 'mobilecoind-ledger-db', str(client_port))
+        self.mobilecoind_db = os.path.join(WORK_DIR, 'mobilecoind-db', str(client_port))
+        self.watcher_db = os.path.join(WORK_DIR, 'watcher-db', str(client_port))
         self.process = None
 
     def start(self, network):
@@ -309,6 +310,7 @@ class Mobilecoind:
             f'--mobilecoind-db {self.mobilecoind_db}',
             f'--listen-uri insecure-mobilecoind://0.0.0.0:{self.client_port}/',
             f'--watcher-db {self.watcher_db}',
+            f'--token-id {self.token_id}',
         ] + peers + tx_srcs)
 
         print('Starting mobilecoind:', cmd)
@@ -459,8 +461,11 @@ class Network:
         self.cli = NetworkCLI(self)
         self.cli.start()
 
-        self.mobilecoind = Mobilecoind(MOBILECOIND_PORT)
+        self.mobilecoind = Mobilecoind(MOBILECOIND_PORT, 0)
         self.mobilecoind.start(self)
+
+        self.mobilecoind2 = Mobilecoind(MOBILECOIND_PORT + 1, 1)
+        self.mobilecoind2.start(self)
 
     def wait(self):
         """Block until one of our processes dies."""

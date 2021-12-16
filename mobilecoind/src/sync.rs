@@ -82,6 +82,7 @@ impl SyncThread {
         ledger_db: LedgerDB,
         mobilecoind_db: Database,
         num_workers: Option<usize>,
+        token_id: i32,
         logger: Logger,
     ) -> Self {
         // Queue for sending jobs to our worker threads.
@@ -110,6 +111,7 @@ impl SyncThread {
                         thread_sender,
                         thread_receiver,
                         thread_queued_monitor_ids,
+                        token_id,
                         thread_logger,
                     );
                 })
@@ -238,12 +240,13 @@ fn sync_thread_entry_point(
     sender: crossbeam_channel::Sender<SyncMsg>,
     receiver: crossbeam_channel::Receiver<SyncMsg>,
     queued_monitor_ids: Arc<Mutex<HashSet<MonitorId>>>,
+    token_id: i32,
     logger: Logger,
 ) {
     for msg in receiver.iter() {
         match msg {
             SyncMsg::SyncMonitor(monitor_id) => {
-                match sync_monitor(&ledger_db, &mobilecoind_db, &monitor_id, &logger) {
+                match sync_monitor(&ledger_db, &mobilecoind_db, &monitor_id, token_id, &logger) {
                     // Success - No more blocks are currently available.
                     Ok(SyncMonitorOk::NoMoreBlocks) => {
                         // Remove the monitor id from the list of queued ones so that the main
@@ -291,6 +294,7 @@ fn sync_monitor(
     ledger_db: &LedgerDB,
     mobilecoind_db: &Database,
     monitor_id: &MonitorId,
+    token_id: i32,
     logger: &Logger,
 ) -> Result<SyncMonitorOk, Error> {
     for _ in 0..MAX_BLOCKS_PROCESSING_CHUNK_SIZE {
@@ -322,6 +326,7 @@ fn sync_monitor(
             &block_contents.outputs,
             monitor_id,
             &monitor_data,
+            token_id,
             logger,
         )?;
 
@@ -343,6 +348,7 @@ fn match_tx_outs_into_utxos(
     outputs: &[TxOut],
     monitor_id: &MonitorId,
     monitor_data: &MonitorData,
+    token_id: i32,
     logger: &Logger,
 ) -> Result<Vec<UnspentTxOut>, Error> {
     let account_key = &monitor_data.account_key;
@@ -350,6 +356,11 @@ fn match_tx_outs_into_utxos(
     let mut results = Vec::new();
 
     for tx_out in outputs {
+        log::info!(logger, "BOO {} {}", token_id, tx_out.token_id);
+        if tx_out.token_id != token_id {
+            continue;
+        }
+
         // Calculate the subaddress spend public key for tx_out.
         let tx_out_target_key = RistrettoPublic::try_from(&tx_out.target_key)?;
         let tx_public_key = RistrettoPublic::try_from(&tx_out.public_key)?;

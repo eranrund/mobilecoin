@@ -32,6 +32,8 @@ impl From<&tx::TxOut> for external::TxOut {
         // TODO and if None?
         if let Some(token_id) = external::TokenId::from_i32(source.token_id) {
             tx_out.set_token_id(token_id);
+        } else {
+            panic!("todo");
         }
 
         tx_out

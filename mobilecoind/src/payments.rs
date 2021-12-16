@@ -111,6 +111,9 @@ pub struct TransactionsManager<
     /// This is abstracted because in tests, we don't want to form grpc
     /// connections to fog
     fog_resolver_factory: Arc<dyn Fn(&[FogUri]) -> Result<FPR, String> + Send + Sync>,
+
+    // TODO
+    token_id: i32,
 }
 
 impl<T: BlockchainConnection + UserTxConnection + 'static, FPR: FogPubkeyResolver> Clone
@@ -124,6 +127,7 @@ impl<T: BlockchainConnection + UserTxConnection + 'static, FPR: FogPubkeyResolve
             logger: self.logger.clone(),
             submit_node_offset: self.submit_node_offset.clone(),
             fog_resolver_factory: self.fog_resolver_factory.clone(),
+            token_id: self.token_id,
         }
     }
 }
@@ -165,6 +169,7 @@ impl<T: BlockchainConnection + UserTxConnection + 'static, FPR: FogPubkeyResolve
         mobilecoind_db: Database,
         peer_manager: ConnectionManager<T>,
         fog_resolver_factory: Arc<dyn Fn(&[FogUri]) -> Result<FPR, String> + Send + Sync>,
+        token_id: i32,
         logger: Logger,
     ) -> Self {
         let mut rng = rand::thread_rng();
@@ -175,6 +180,7 @@ impl<T: BlockchainConnection + UserTxConnection + 'static, FPR: FogPubkeyResolve
             logger,
             submit_node_offset: Arc::new(AtomicUsize::new(rng.next_u64() as usize)),
             fog_resolver_factory,
+            token_id,
         }
     }
 
@@ -276,6 +282,7 @@ impl<T: BlockchainConnection + UserTxConnection + 'static, FPR: FogPubkeyResolve
             outlays,
             tombstone_block,
             &self.fog_resolver_factory,
+            self.token_id,
             &mut rng,
             &self.logger,
         )?;
@@ -384,6 +391,7 @@ impl<T: BlockchainConnection + UserTxConnection + 'static, FPR: FogPubkeyResolve
             &outlays,
             tombstone_block,
             &self.fog_resolver_factory,
+            self.token_id,
             &mut rng,
             &self.logger,
         )?;
@@ -468,6 +476,7 @@ impl<T: BlockchainConnection + UserTxConnection + 'static, FPR: FogPubkeyResolve
             &outlays,
             tombstone_block,
             &self.fog_resolver_factory,
+            self.token_id,
             &mut rng,
             &self.logger,
         )?;
@@ -738,6 +747,7 @@ impl<T: BlockchainConnection + UserTxConnection + 'static, FPR: FogPubkeyResolve
         destinations: &[Outlay],
         tombstone_block: BlockIndex,
         fog_resolver_factory: &Arc<dyn Fn(&[FogUri]) -> Result<FPR, String> + Send + Sync>,
+        token_id: i32,
         rng: &mut (impl RngCore + CryptoRng),
         logger: &Logger,
     ) -> Result<TxProposal, Error> {
@@ -770,8 +780,7 @@ impl<T: BlockchainConnection + UserTxConnection + 'static, FPR: FogPubkeyResolve
         };
 
         // Create tx_builder.
-        let mut tx_builder =
-            TransactionBuilder::new(fog_resolver, NoMemoBuilder::default(), TokenId::MOB);
+        let mut tx_builder = TransactionBuilder::new(fog_resolver, NoMemoBuilder::default(), TokenId::try_from(token_id).map_err(|_| Error::TxBuild("Invalid token id".into()))?);
 
         tx_builder
             .set_fee(fee)

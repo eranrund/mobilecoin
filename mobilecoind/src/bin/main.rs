@@ -120,6 +120,7 @@ fn main() {
                 mobilecoind_db.clone(),
                 peer_manager,
                 config.get_fog_resolver_factory(logger.clone()),
+                config.token_id,
                 logger.clone(),
             );
 
@@ -131,6 +132,7 @@ fn main() {
                 network_state,
                 listen_uri,
                 config.num_workers,
+                config.token_id,
                 logger,
             );
 

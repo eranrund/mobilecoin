@@ -76,6 +76,17 @@ pub fn bootstrap_ledger(
                     picomob_per_output,
                     &mut rng,
                     hint_text,
+                    TokenId::MOB,
+                    &logger,
+                ));
+
+                // TODO remove
+                outputs.push(create_output(
+                    recipient,
+                    picomob_per_output / 10,
+                    &mut rng,
+                    hint_text,
+                    TokenId::Token1,
                     &logger,
                 ));
             }
@@ -119,6 +130,7 @@ fn create_output(
     value: u64,
     rng: &mut FixedRng,
     hint_slice: Option<&str>,
+    token_id: TokenId,
     logger: &Logger,
 ) -> TxOut {
     let tx_private_key = RistrettoPrivate::from_random(rng);
@@ -136,7 +148,7 @@ fn create_output(
         EncryptedFogHint::fake_onetime_hint(rng)
     };
 
-    let mut output = TxOut::new(value, recipient, &tx_private_key, hint, TokenId::MOB).unwrap();
+    let mut output = TxOut::new(value, recipient, &tx_private_key, hint, token_id).unwrap();
     // At this point, we clear the e_memo field, because, historically the genesis
     // block did not have memo fields, even though they are expected now.
     output.e_memo = None;

@@ -69,6 +69,7 @@ impl Service {
         network_state: Arc<RwLock<PollingNetworkState<T>>>,
         listen_uri: &MobilecoindUri,
         num_workers: Option<usize>,
+        token_id: i32,
         logger: Logger,
     ) -> Self {
         let sync_thread = if mobilecoind_db.is_db_encrypted() {
@@ -80,6 +81,7 @@ impl Service {
                 ledger_db.clone(),
                 mobilecoind_db.clone(),
                 num_workers,
+                token_id,
                 logger.clone(),
             ))))
         };
@@ -97,6 +99,7 @@ impl Service {
                     ledger_db.clone(),
                     mobilecoind_db.clone(),
                     num_workers,
+                    token_id,
                     logger.clone(),
                 ));
             })
