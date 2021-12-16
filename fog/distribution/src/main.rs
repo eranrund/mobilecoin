@@ -448,7 +448,11 @@ fn submit_tx(
                 {
                     log::warn!(
                             logger,
-                            "Transaction {:?} could not be submitted before tombstone block passed, giving up", counter);
+                            "Transaction {:?} could not be submitted before tombstone block passed, giving up (tombstone = {})",
+                            counter,
+                            tx.prefix.tombstone_block,
+                    );
+
                     return false;
                 }
 
