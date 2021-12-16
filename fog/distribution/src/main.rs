@@ -148,7 +148,12 @@ fn main() {
         crossbeam_channel::unbounded::<SpendableTxOut>();
 
     while let Ok(block_contents) = ledger_db.get_block_contents(block_count) {
-        let transactions = block_contents.outputs;
+        let transactions: Vec<TxOut> = block_contents
+            .outputs
+            .into_iter()
+            .filter(|tx_out| tx_out.token_id == 0)
+            .collect();
+
         // Only get num_transactions per account for the first block, then assume
         // future blocks that were bootstrapped are similar
         if num_transactions_per_account == 0 {
@@ -624,41 +629,52 @@ fn get_rings(
     num_rings: usize,
 ) -> Vec<Vec<(TxOut, TxOutMembershipProof)>> {
     let num_requested = ring_size * num_rings;
-    let num_txos = ledger_db.num_txos().unwrap();
+    let num_txos = ledger_db
+        .num_txos_by_token_id(0)
+        .expect("num_txos_by_token_id failed");
 
-    // Randomly sample `num_requested` TxOuts, without replacement and convert into
-    // a Vec<u64>
-    let mut rng = rand::thread_rng();
-    let mut sampled_indices: HashSet<u64> = HashSet::default();
-    while sampled_indices.len() < num_requested {
-        let index = rng.gen_range(0..num_txos);
-        sampled_indices.insert(index);
+    if num_requested > (num_txos as usize) {
+        panic!("insufficient tx outs");
     }
-    let sampled_indices_vec: Vec<u64> = sampled_indices.into_iter().collect();
 
-    // Get proofs for all of those indexes.
-    let proofs = ledger_db
-        .get_tx_out_proof_of_memberships(&sampled_indices_vec)
-        .unwrap();
-
-    // Create an iterator that returns (index, proof) elements.
-    let mut indexes_and_proofs_iterator = sampled_indices_vec.into_iter().zip(proofs.into_iter());
-
-    // Convert that into a Vec<Vec<TxOut, TxOutMembershipProof>>
-    let mut rings_with_proofs = Vec::new();
-
-    for _ in 0..num_rings {
-        let mut ring = Vec::new();
-        for _ in 0..ring_size {
-            let (index, proof) = indexes_and_proofs_iterator.next().unwrap();
-            let tx_out = ledger_db.get_tx_out_by_index(index).unwrap();
-
-            ring.push((tx_out, proof));
+    // Randomly sample `num_requested` indices of TxOuts to use as mixins.
+    let mixin_indices: Vec<u64> = {
+        let mut rng = rand::thread_rng();
+        let mut samples: HashSet<u64> = HashSet::default();
+        while samples.len() < num_requested {
+            let index = rng.gen_range(0..num_txos);
+            samples.insert(index);
         }
-        rings_with_proofs.push(ring);
+        samples.into_iter().collect()
+    };
+
+    let mut mixins = Vec::<TxOut>::new();
+    let mut mixin_absolute_indices = Vec::<u64>::new();
+
+    for mixin_index in mixin_indices {
+        let (tx_out, abs_index) = ledger_db
+            .get_tx_out_by_token_id_and_index(0, mixin_index)
+            .expect("failed getting tx out");
+        mixins.push(tx_out);
+        mixin_absolute_indices.push(abs_index);
     }
 
-    rings_with_proofs
+    let membership_proofs = ledger_db
+        .get_tx_out_proof_of_memberships(&mixin_absolute_indices)
+        .expect("failed getting membership proof");
+
+    let mixins_with_proofs: Vec<(TxOut, TxOutMembershipProof)> = mixins
+        .into_iter()
+        .zip(membership_proofs.into_iter())
+        .collect();
+
+    // Group mixins and proofs into individual rings.
+    let result: Vec<Vec<(_, _)>> = mixins_with_proofs
+        .chunks(ring_size)
+        .map(|chunk| chunk.to_vec())
+        .collect();
+
+    result
 }
 
 fn get_num_transactions_per_account(
