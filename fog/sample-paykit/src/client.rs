@@ -74,6 +74,9 @@ pub struct Client {
     use_rth_memos: bool,
 
     logger: Logger,
+
+    // TODO
+    token_id: i32,
 }
 
 impl Client {
@@ -91,9 +94,11 @@ impl Client {
         account_key: AccountKey,
         address_book: Vec<PublicAddress>,
         use_rth_memos: bool,
+        token_id: i32,
         logger: Logger,
     ) -> Self {
-        let tx_data = CachedTxData::new(account_key.clone(), address_book, logger.clone());
+        let tx_data =
+            CachedTxData::new(account_key.clone(), address_book, token_id, logger.clone());
 
         Client {
             consensus_service_conn,
@@ -109,6 +114,7 @@ impl Client {
             tx_data,
             new_tx_block_attempts: DEFAULT_NEW_TX_BLOCK_ATTEMPTS,
             use_rth_memos,
+            token_id,
             logger,
         }
     }

@@ -202,7 +202,7 @@ fn main() {
                     .get_value(&shared_secret)
                     .expect("Malformed amount");
 
-                log::info!(
+                log::debug!(
                     logger,
                     "(account = {:?}) and (tx_index {:?}) = {}",
                     account_index,
