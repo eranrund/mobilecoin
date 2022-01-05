@@ -16,7 +16,7 @@ use mc_transaction_core::{
     fog_hint::FogHint,
     onetime_keys::create_shared_secret,
     ring_signature::SignatureRctBulletproofs,
-    tx::{TokenId, Tx, TxIn, TxOut, TxOutConfirmationNumber, TxPrefix},
+    tx::{Tx, TxIn, TxOut, TxOutConfirmationNumber, TxPrefix},
     CompressedCommitment, MemoContext, MemoPayload, NewMemoError,
 };
 use mc_util_from_random::FromRandom;
@@ -54,8 +54,8 @@ pub struct TransactionBuilder<FPR: FogPubkeyResolver> {
     /// types that SDKs must bind to if they support multiple memo builder
     /// types.
     memo_builder: Option<Box<dyn MemoBuilder + 'static + Send + Sync>>,
-    /// TODO
-    token_id: TokenId,
+    /// The token id for the transaction
+    token_id: i32,
 }
 
 impl<FPR: FogPubkeyResolver> TransactionBuilder<FPR> {
@@ -66,10 +66,11 @@ impl<FPR: FogPubkeyResolver> TransactionBuilder<FPR> {
     ///   transaction
     /// * `memo_builder` - An object which creates memos for the TxOuts in this
     ///   transaction
+    /// * `token_id` - The token id to use for this transaction
     pub fn new<MB: MemoBuilder + 'static + Send + Sync>(
         fog_resolver: FPR,
         memo_builder: MB,
-        token_id: TokenId,
+        token_id: i32,
     ) -> Self {
         TransactionBuilder::new_with_box(fog_resolver, Box::new(memo_builder), token_id)
     }
@@ -82,10 +83,11 @@ impl<FPR: FogPubkeyResolver> TransactionBuilder<FPR> {
     ///   transaction
     /// * `memo_builder` - An object which creates memos for the TxOuts in this
     ///   transaction
+    /// * `token_id` - The token id to use for this transaction
     pub fn new_with_box(
         fog_resolver: FPR,
         memo_builder: Box<dyn MemoBuilder + Send + Sync>,
-        token_id: TokenId,
+        token_id: i32,
     ) -> Self {
         TransactionBuilder {
             input_credentials: Vec::new(),
@@ -389,13 +391,14 @@ impl<FPR: FogPubkeyResolver> TransactionBuilder<FPR> {
 /// * `recipient` - Recipient's address.
 /// * `fog_hint` - The encrypted fog hint to use
 /// * `memo_fn` - The memo function to use -- see TxOut::new_with_memo docu
+/// * `token_id` - The token id to use
 /// * `rng` -
 fn create_output_with_fog_hint<RNG: CryptoRng + RngCore>(
     value: u64,
     recipient: &PublicAddress,
     fog_hint: EncryptedFogHint,
     memo_fn: impl FnOnce(MemoContext) -> Result<Option<MemoPayload>, NewMemoError>,
-    token_id: TokenId,
+    token_id: i32,
     rng: &mut RNG,
 ) -> Result<(TxOut, RistrettoPublic), TxBuilderError> {
     let private_key = RistrettoPrivate::from_random(rng);

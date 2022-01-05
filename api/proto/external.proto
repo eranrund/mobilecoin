@@ -166,12 +166,6 @@ message EncryptedFogHint { bytes data = 1; }
 // The bytes of encrypted memo
 message EncryptedMemo { bytes data = 1; }
 
-enum TokenId {
-  MOB = 0;
-  Token1 = 1;
-  Token2 = 2;
-}
-
 // A Transaction Output.
 message TxOut {
   // Amount.
@@ -188,11 +182,11 @@ message TxOut {
   // or a random cryptogram indistinguishable from a real one.
   EncryptedFogHint e_fog_hint = 4;
 
-  // Encrypted memo
+  // Encrypted memo.
   EncryptedMemo e_memo = 5;
 
-  // TODO
-  TokenId token_id = 6;
+  // Token ID.
+  int32 token_id = 6;
 }
 
 message TxIn {
@@ -237,8 +231,9 @@ message Tx {
   // The RingCT signature on the prefix.
   SignatureRctBulletproofs signature = 2;
 
-  // TODO
-  TokenId token_id = 3;
+  // The token id this transaction is transacting in.
+  // All TxOuts referenced in this transaction must have this token id.
+  int32 token_id = 3;
 }
 
 message TxHash {

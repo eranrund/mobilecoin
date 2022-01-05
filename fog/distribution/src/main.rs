@@ -22,9 +22,8 @@ use mc_transaction_core::{
     get_tx_out_shared_secret,
     onetime_keys::{recover_onetime_private_key, view_key_matches_output},
     ring_signature::KeyImage,
-    tx::{Tx, TxOut, TxOutMembershipProof},
+    tx::{token_ids, Tx, TxOut, TxOutMembershipProof},
     validation::TransactionValidationError,
-    TokenId,
 };
 use mc_transaction_std::{EmptyMemoBuilder, InputCredentials, TransactionBuilder};
 use mc_util_uri::FogUri;
@@ -508,7 +507,7 @@ fn build_tx(
 
     // Create tx_builder.
     let mut tx_builder =
-        TransactionBuilder::new(fog_resolver, EmptyMemoBuilder::default(), TokenId::MOB);
+        TransactionBuilder::new(fog_resolver, EmptyMemoBuilder::default(), token_ids::MOB);
 
     tx_builder.set_fee(FEE.load(Ordering::SeqCst)).unwrap();
 

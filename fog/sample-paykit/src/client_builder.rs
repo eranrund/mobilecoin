@@ -16,7 +16,7 @@ use mc_fog_report_connection::GrpcFogReportConnection;
 use mc_fog_uri::{FogLedgerUri, FogViewUri};
 use mc_fog_view_connection::FogViewGrpcClient;
 use mc_sgx_css::Signature;
-use mc_transaction_core::constants::RING_SIZE;
+use mc_transaction_core::{constants::RING_SIZE, tx::token_ids};
 use mc_util_uri::{ConnectionUri, ConsensusClientUri};
 use std::sync::Arc;
 
@@ -179,6 +179,7 @@ impl ClientBuilder {
             self.key.clone(),
             self.address_book.clone(),
             self.use_rth_memos,
+            token_ids::MOB, // TODO
             self.logger.clone(),
         )
     }

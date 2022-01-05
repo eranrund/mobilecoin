@@ -3,7 +3,6 @@
 use crate::{convert::ConversionError, external};
 use mc_crypto_keys::{CompressedRistrettoPublic, RistrettoPublic};
 use mc_transaction_core::{encrypted_fog_hint::EncryptedFogHint, tx, Amount, EncryptedMemo};
-use protobuf::ProtobufEnum;
 use std::convert::TryFrom;
 
 /// Convert tx::TxOut --> external::TxOut.
@@ -29,12 +28,7 @@ impl From<&tx::TxOut> for external::TxOut {
                 .set_data(AsRef::<[u8]>::as_ref(memo).to_vec());
         }
 
-        // TODO and if None?
-        if let Some(token_id) = external::TokenId::from_i32(source.token_id) {
-            tx_out.set_token_id(token_id);
-        } else {
-            panic!("todo");
-        }
+        tx_out.set_token_id(source.token_id);
 
         tx_out
     }
@@ -70,8 +64,7 @@ impl TryFrom<&external::TxOut> for tx::TxOut {
             )
         };
 
-        let token_id = tx::TokenId::try_from(source.get_token_id())
-            .map_err(|_| ConversionError::InvalidTokenId)? as i32;
+        let token_id = source.get_token_id();
 
         let tx_out = tx::TxOut {
             amount,

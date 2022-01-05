@@ -23,8 +23,7 @@ use mc_transaction_core::{
     get_tx_out_shared_secret,
     onetime_keys::{recover_onetime_private_key, view_key_matches_output},
     ring_signature::KeyImage,
-    tx::{Tx, TxOut, TxOutMembershipProof},
-    TokenId,
+    tx::{token_ids, Tx, TxOut, TxOutMembershipProof},
 };
 use mc_transaction_std::{InputCredentials, NoMemoBuilder, TransactionBuilder};
 use mc_util_uri::ConnectionUri;
@@ -501,7 +500,7 @@ fn build_tx(
     let mut tx_builder = TransactionBuilder::new(
         FogResolver::default(),
         NoMemoBuilder::default(),
-        TokenId::MOB,
+        token_ids::MOB,
     );
 
     tx_builder

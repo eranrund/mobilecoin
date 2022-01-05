@@ -6,8 +6,8 @@ use mc_common::{HashMap, HashSet};
 use mc_crypto_keys::{CompressedRistrettoPublic, RistrettoPrivate};
 use mc_transaction_core::{
     ring_signature::KeyImage,
-    tx::{TxOut, TxOutMembershipElement, TxOutMembershipProof},
-    Block, BlockContents, BlockData, BlockID, BlockSignature, TokenId, BLOCK_VERSION,
+    tx::{token_ids, TxOut, TxOutMembershipElement, TxOutMembershipProof},
+    Block, BlockContents, BlockData, BlockID, BlockSignature, BLOCK_VERSION,
 };
 use mc_util_from_random::FromRandom;
 use rand::{rngs::StdRng, SeedableRng};
@@ -100,6 +100,15 @@ impl Ledger for MockLedger {
         Ok(self.lock().tx_outs.len() as u64)
     }
 
+    fn num_txos_by_token_id(&self, token_id: i32) -> Result<u64, Error> {
+        Ok(self
+            .lock()
+            .tx_outs
+            .iter()
+            .filter(|tx_out| tx_out.token_id == token_id)
+            .count() as u64)
+    }
+
     fn get_block(&self, block_number: u64) -> Result<Block, Error> {
         self.lock()
             .blocks_by_block_number
@@ -142,6 +151,15 @@ impl Ledger for MockLedger {
     }
 
     fn get_tx_out_by_index(&self, _: u64) -> Result<TxOut, Error> {
+        // Unused for these tests.
+        unimplemented!()
+    }
+
+    fn get_tx_out_by_token_id_and_index(
+        &self,
+        _token_id: i32,
+        _index: u64,
+    ) -> Result<(TxOut, u64), Error> {
         // Unused for these tests.
         unimplemented!()
     }
@@ -220,7 +238,7 @@ pub fn get_test_ledger_blocks(n_blocks: usize) -> Vec<(Block, BlockContents)> {
                 &account_key.default_subaddress(),
                 &RistrettoPrivate::from_random(&mut rng),
                 Default::default(),
-                TokenId::MOB,
+                token_ids::MOB,
             )
             .unwrap();
             // Version 0 tx_out in the origin block don't have memos
@@ -238,7 +256,7 @@ pub fn get_test_ledger_blocks(n_blocks: usize) -> Vec<(Block, BlockContents)> {
                 &account_key.default_subaddress(),
                 &RistrettoPrivate::from_random(&mut rng),
                 Default::default(),
-                TokenId::MOB,
+                token_ids::MOB,
             )
             .unwrap();
 

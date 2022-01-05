@@ -11,9 +11,8 @@ use crate::{
     constants::*,
     membership_proofs::{derive_proof_at_index, is_membership_proof_valid},
     tx::{Tx, TxOut, TxOutMembershipProof, TxPrefix},
-    CompressedCommitment, TokenId,
+    CompressedCommitment,
 };
-use core::convert::TryFrom;
 use mc_common::HashSet;
 use mc_crypto_keys::CompressedRistrettoPublic;
 use rand_core::{CryptoRng, RngCore};
@@ -73,7 +72,9 @@ pub fn validate<R: RngCore + CryptoRng>(
 
 /// TODO
 fn validate_token_id(tx_prefix: &TxPrefix, token_id: i32) -> TransactionValidationResult<()> {
-    let _ = TokenId::try_from(token_id).map_err(|_| TransactionValidationError::InvalidTokenId)?;
+    if token_id < 0 {
+        return Err(TransactionValidationError::InvalidTokenId);
+    }
 
     for input in tx_prefix.inputs.iter() {
         if input.ring.iter().any(|tx_out| tx_out.token_id != token_id) {

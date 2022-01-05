@@ -2,29 +2,7 @@
 
 use crate::{convert::ConversionError, external};
 use mc_transaction_core::{ring_signature::SignatureRctBulletproofs, tx};
-use protobuf::ProtobufEnum;
 use std::convert::TryFrom;
-
-// TODO move to its own file
-impl From<&tx::TokenId> for external::TokenId {
-    fn from(source: &tx::TokenId) -> Self {
-        match source {
-            tx::TokenId::MOB => external::TokenId::MOB,
-            tx::TokenId::Token1 => external::TokenId::Token1,
-            tx::TokenId::Token2 => external::TokenId::Token2,
-        }
-    }
-}
-
-impl From<external::TokenId> for tx::TokenId {
-    fn from(source: external::TokenId) -> Self {
-        match source {
-            external::TokenId::MOB => tx::TokenId::MOB,
-            external::TokenId::Token1 => tx::TokenId::Token1,
-            external::TokenId::Token2 => tx::TokenId::Token2,
-        }
-    }
-}
 
 /// Convert mc_transaction_core::tx::Tx --> external::Tx.
 impl From<&tx::Tx> for external::Tx {
@@ -32,11 +10,7 @@ impl From<&tx::Tx> for external::Tx {
         let mut tx = external::Tx::new();
         tx.set_prefix(external::TxPrefix::from(&source.prefix));
         tx.set_signature(external::SignatureRctBulletproofs::from(&source.signature));
-
-        // TODO and if None?
-        if let Some(token_id) = external::TokenId::from_i32(source.token_id) {
-            tx.set_token_id(token_id);
-        }
+        tx.set_token_id(source.token_id);
 
         tx
     }
@@ -49,8 +23,7 @@ impl TryFrom<&external::Tx> for tx::Tx {
     fn try_from(source: &external::Tx) -> Result<Self, Self::Error> {
         let prefix = tx::TxPrefix::try_from(source.get_prefix())?;
         let signature = SignatureRctBulletproofs::try_from(source.get_signature())?;
-        let token_id = tx::TokenId::try_from(source.get_token_id())
-            .map_err(|_| ConversionError::InvalidTokenId)? as i32;
+        let token_id = source.get_token_id();
         Ok(tx::Tx {
             prefix,
             signature,

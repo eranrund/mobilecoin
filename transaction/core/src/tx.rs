@@ -11,7 +11,7 @@ use mc_crypto_keys::{CompressedRistrettoPublic, RistrettoPrivate, RistrettoPubli
 use mc_util_repr_bytes::{
     derive_prost_message_from_repr_bytes, typenum::U32, GenericArray, ReprBytes,
 };
-use prost::{Enumeration, Message};
+use prost::Message;
 use serde::{Deserialize, Serialize};
 
 use crate::{
@@ -25,6 +25,11 @@ use crate::{
     ring_signature::{KeyImage, SignatureRctBulletproofs},
     CompressedCommitment, NewMemoError, NewTxError,
 };
+
+pub mod token_ids {
+    pub const MOB: i32 = 0;
+    pub const TOKEN1: i32 = 1;
+}
 
 /// Transaction hash length, in bytes.
 pub const TX_HASH_LEN: usize = 32;
@@ -98,32 +103,6 @@ impl fmt::Debug for TxHash {
     }
 }
 
-/// TODO
-#[derive(
-    Clone, Copy, Debug, Eq, Hash, PartialEq, Serialize, Deserialize, Enumeration, Digestible,
-)]
-pub enum TokenId {
-    MOB = 0,
-    Token1 = 1,
-    Token2 = 2,
-}
-
-impl TryFrom<i32> for TokenId {
-    type Error = ();
-
-    fn try_from(source: i32) -> Result<Self, Self::Error> {
-        if source == TokenId::MOB as i32 {
-            Ok(TokenId::MOB)
-        } else if source == TokenId::Token1 as i32 {
-            Ok(TokenId::Token1)
-        } else if source == TokenId::Token2 as i32 {
-            Ok(TokenId::Token2)
-        } else {
-            Err(())
-        }
-    }
-}
-
 /// A CryptoNote-style transaction.
 #[derive(Clone, Eq, PartialEq, Serialize, Deserialize, Message, Digestible)]
 pub struct Tx {
@@ -136,7 +115,7 @@ pub struct Tx {
     pub signature: SignatureRctBulletproofs,
 
     /// Token id for this transaction.
-    #[prost(enumeration = "TokenId", tag = "3")]
+    #[prost(int32, tag = "3")]
     pub token_id: i32,
 }
 
@@ -282,7 +261,7 @@ pub struct TxOut {
     pub e_memo: Option<EncryptedMemo>,
 
     /// TODO
-    #[prost(enumeration = "TokenId", tag = "6")]
+    #[prost(int32, tag = "6")]
     pub token_id: i32,
 }
 
@@ -316,12 +295,13 @@ impl TxOut {
     /// * `recipient` - Recipient's address.
     /// * `tx_private_key` - The transaction's private key
     /// * `hint` - Encrypted Fog hint for this output.
+    /// * `token_id` - The token id of this TxOut
     pub fn new(
         value: u64,
         recipient: &PublicAddress,
         tx_private_key: &RistrettoPrivate,
         hint: EncryptedFogHint,
-        token_id: TokenId,
+        token_id: i32,
     ) -> Result<Self, AmountError> {
         TxOut::new_with_memo(
             value,
@@ -349,13 +329,14 @@ impl TxOut {
     /// * `hint` - Encrypted Fog hint.
     /// * `memo_fn` - A callback taking MemoContext, which produces a
     ///   MemoPayload, or a NewMemo error
+    /// * `token_id` - The token id of this TxOut
     pub fn new_with_memo(
         value: u64,
         recipient: &PublicAddress,
         tx_private_key: &RistrettoPrivate,
         hint: EncryptedFogHint,
         memo_fn: impl FnOnce(MemoContext) -> Result<Option<MemoPayload>, NewMemoError>,
-        token_id: TokenId,
+        token_id: i32,
     ) -> Result<Self, NewTxError> {
         let target_key = create_tx_out_target_key(tx_private_key, recipient).into();
         let public_key = create_tx_out_public_key(tx_private_key, recipient.spend_public_key());

@@ -32,8 +32,8 @@ use mc_transaction_core::{
     constants::MINIMUM_FEE,
     onetime_keys::*,
     ring_signature::KeyImage,
-    tx::{Tx, TxOut, TxOutMembershipProof},
-    BlockIndex, TokenId,
+    tx::{token_ids, Tx, TxOut, TxOutMembershipProof},
+    BlockIndex,
 };
 use mc_transaction_std::{
     ChangeDestination, InputCredentials, MemoType, NoMemoBuilder, RTHMemoBuilder,
@@ -76,6 +76,7 @@ pub struct Client {
     logger: Logger,
 
     // TODO
+    #[allow(dead_code)]
     token_id: i32,
 }
 
@@ -97,8 +98,7 @@ impl Client {
         token_id: i32,
         logger: Logger,
     ) -> Self {
-        let tx_data =
-            CachedTxData::new(account_key.clone(), address_book, token_id, logger.clone());
+        let tx_data = CachedTxData::new(account_key.clone(), address_book, logger.clone());
 
         Client {
             consensus_service_conn,
@@ -582,10 +582,10 @@ fn build_transaction_helper<T: RngCore + CryptoRng, FPR: FogPubkeyResolver>(
         memo_builder.set_sender_credential(SenderMemoCredential::from(source_account_key));
         memo_builder.enable_destination_memo();
 
-        TransactionBuilder::new(fog_resolver, memo_builder, TokenId::MOB)
+        TransactionBuilder::new(fog_resolver, memo_builder, token_ids::MOB)
     } else {
         let memo_builder = NoMemoBuilder::default();
-        TransactionBuilder::new(fog_resolver, memo_builder, TokenId::MOB)
+        TransactionBuilder::new(fog_resolver, memo_builder, token_ids::MOB)
     };
     tx_builder.set_fee(fee)?;
 

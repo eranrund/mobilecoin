@@ -135,6 +135,18 @@ impl Ledger for MockLedger {
         }
     }
 
+    fn num_txos_by_token_id(&self, _token_id: i32) -> Result<u64, mc_ledger_db::Error> {
+        unimplemented!()
+    }
+
+    fn get_tx_out_by_token_id_and_index(
+        &self,
+        _token_id: i32,
+        _index: u64,
+    ) -> Result<(TxOut, u64), mc_ledger_db::Error> {
+        unimplemented!()
+    }
+
     fn get_tx_out_proof_of_memberships(
         &self,
         indexes: &[u64],
