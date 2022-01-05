@@ -266,4 +266,6 @@ message TxOutRecord {
     /// This exactly 46 bytes when present.
     /// This is omitted for TxOut's from before the upgrade that introduced memos.
     bytes tx_out_e_memo_data = 9;
+    /// The tx out's token id
+    int32 token_id = 10;
 }
