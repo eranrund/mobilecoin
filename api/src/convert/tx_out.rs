@@ -105,6 +105,7 @@ mod tests {
 
         let recovered_tx_out = tx::TxOut::try_from(&converted).unwrap();
         assert_eq!(source.amount, recovered_tx_out.amount);
+        assert_eq!(source.token_id, recovered_tx_out.token_id);
     }
 
     #[test]

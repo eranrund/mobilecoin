@@ -46,9 +46,7 @@ mod tests {
     use protobuf::Message;
     use rand::{rngs::StdRng, SeedableRng};
 
-    #[test]
-    /// Tx --> externalTx --> Tx should be the identity function.
-    fn test_convert_tx() {
+    fn get_test_tx() -> Tx {
         // Generate a Tx to test with. This is copied from
         // transaction_builder.rs::test_simple_transaction
         let mut rng: StdRng = SeedableRng::from_seed([1u8; 32]);
@@ -107,13 +105,61 @@ mod tests {
             .add_output(65536, &bob.default_subaddress(), &mut rng)
             .unwrap();
 
-        let tx = transaction_builder.build(&mut rng).unwrap();
+        transaction_builder.build(&mut rng).unwrap()
+    }
+
+    #[test]
+    /// Tx --> externalTx --> Tx should be the identity function.
+    fn test_convert_tx() {
+        let tx = get_test_tx();
 
         // decode(encode(tx)) should be the identity function.
         {
             let bytes = mc_util_serial::encode(&tx);
             let recovered_tx = mc_util_serial::decode(&bytes).unwrap();
             assert_eq!(tx, recovered_tx);
+        }
+
+        // Converting mc_transaction_core::Tx -> external::Tx -> mc_transaction_core::Tx
+        // should be the identity function.
+        {
+            let external_tx: external::Tx = external::Tx::from(&tx);
+            let recovered_tx: Tx = Tx::try_from(&external_tx).unwrap();
+            assert_eq!(tx, recovered_tx);
+        }
+
+        // Encoding with prost, decoding with protobuf should be the identity function.
+        {
+            let bytes = mc_util_serial::encode(&tx);
+            let recovered_tx = external::Tx::parse_from_bytes(&bytes).unwrap();
+            assert_eq!(recovered_tx, external::Tx::from(&tx));
+        }
+
+        // Encoding with protobuf, decoding with prost should be the identity function.
+        {
+            let external_tx: external::Tx = external::Tx::from(&tx);
+            let bytes = external_tx.write_to_bytes().unwrap();
+            let recovered_tx: Tx = mc_util_serial::decode(&bytes).unwrap();
+            assert_eq!(tx, recovered_tx);
+        }
+    }
+
+    #[test]
+    /// Tx --> externalTx --> Tx should be the identity function even with
+    /// token_id != 0.
+    fn test_convert_tx_with_token_id() {
+        const TOKEN_ID: i32 = 102030;
+
+        let mut tx = get_test_tx();
+        tx.token_id = TOKEN_ID;
+
+        for input in tx.prefix.inputs.iter_mut() {
+            for tx_out in input.ring.iter_mut() {
+                tx_out.token_id = TOKEN_ID;
+            }
+        }
+        for output in tx.prefix.outputs.iter_mut() {
+            output.token_id = TOKEN_ID;
         }
 
         // Converting mc_transaction_core::Tx -> external::Tx -> mc_transaction_core::Tx

@@ -433,7 +433,8 @@ mod tests {
                 validate_membership_proofs, validate_memos_exist, validate_number_of_inputs,
                 validate_number_of_outputs, validate_outputs_public_keys_are_unique,
                 validate_ring_elements_are_unique, validate_ring_sizes, validate_signature,
-                validate_tombstone, validate_transaction_fee, MAX_TOMBSTONE_BLOCKS,
+                validate_token_id, validate_tombstone, validate_transaction_fee,
+                MAX_TOMBSTONE_BLOCKS,
             },
         },
     };
@@ -452,7 +453,7 @@ mod tests {
 
     // HACK: To test validation we need valid Tx objects. The code to create them is
     // complicated, and a variant of it resides inside the
-    // `transaction_test_utils` crate. However,when we depend on it in our
+    // `transaction_test_utils` crate. However, when we depend on it in our
     // [dev-dependencies], it will compile and link against another copy of this
     // crate, since cargo is weird like that. Relying in the fact that both data
     // structures are actually the same, this hack lets us convert from the
@@ -1032,5 +1033,41 @@ mod tests {
                 Err(TransactionValidationError::TombstoneBlockTooFar)
             );
         }
+    }
+
+    #[test]
+    /// Should return InvalodTokenId if the token id is negative.
+    fn test_validate_token_id_negative() {
+        let (mut tx, _ledger) = create_test_tx();
+        tx.token_id = -1;
+
+        assert_eq!(
+            validate_token_id(&tx.prefix, tx.token_id),
+            Err(TransactionValidationError::InvalidTokenId)
+        );
+    }
+
+    #[test]
+    /// Should return InconsistentTokenId if any inputs or outputs token ids
+    /// differ from the one set in the transaction.
+    fn test_validate_token_id_inconsistencies() {
+        let (tx, _ledger) = create_test_tx();
+
+        // A sanity that an unmodified transaction is valid.
+        assert_eq!(validate_token_id(&tx.prefix, tx.token_id), Ok(()));
+
+        let mut tx1 = tx.clone();
+        tx1.prefix.outputs[0].token_id = 1;
+        assert_eq!(
+            validate_token_id(&tx1.prefix, tx1.token_id),
+            Err(TransactionValidationError::InconsistentTokenId)
+        );
+
+        let mut tx2 = tx.clone();
+        tx2.prefix.inputs[0].ring[0].token_id = 1;
+        assert_eq!(
+            validate_token_id(&tx2.prefix, tx2.token_id),
+            Err(TransactionValidationError::InconsistentTokenId)
+        );
     }
 }
