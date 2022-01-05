@@ -432,9 +432,8 @@ mod test {
         },
     };
     use mc_account_keys::{AccountKey, PublicAddress, DEFAULT_SUBADDRESS_INDEX};
-
     use mc_common::logger::{test_with_logger, Logger};
-    use mc_transaction_core::tx::TxOut;
+    use mc_transaction_core::tx::{token_ids, TxOut};
     use rand::{rngs::StdRng, SeedableRng};
     use std::iter::FromIterator;
 
@@ -496,7 +495,14 @@ mod test {
         assert_eq!(monitor_data.next_block, 0);
 
         // Process the first MAX_BLOCKS_PROCESSING_CHUNK_SIZE blocks.
-        let result = sync_monitor(&ledger_db, &mobilecoind_db, &monitor_id, &logger).unwrap();
+        let result = sync_monitor(
+            &ledger_db,
+            &mobilecoind_db,
+            &monitor_id,
+            token_ids::MOB,
+            &logger,
+        )
+        .unwrap();
         assert_eq!(result, SyncMonitorOk::MoreBlocksPotentiallyAvailable);
 
         // We should now discover some outputs. Each block has 1 output per recipient,
@@ -521,7 +527,14 @@ mod test {
         }
 
         // Process the second MAX_BLOCKS_PROCESSING_CHUNK_SIZE blocks.
-        let result = sync_monitor(&ledger_db, &mobilecoind_db, &monitor_id, &logger).unwrap();
+        let result = sync_monitor(
+            &ledger_db,
+            &mobilecoind_db,
+            &monitor_id,
+            token_ids::MOB,
+            &logger,
+        )
+        .unwrap();
         assert_eq!(result, SyncMonitorOk::MoreBlocksPotentiallyAvailable);
 
         let monitor_data = mobilecoind_db.get_monitor_data(&monitor_id).unwrap();
@@ -544,7 +557,14 @@ mod test {
         }
 
         // Process the last remaining block.
-        let result = sync_monitor(&ledger_db, &mobilecoind_db, &monitor_id, &logger).unwrap();
+        let result = sync_monitor(
+            &ledger_db,
+            &mobilecoind_db,
+            &monitor_id,
+            token_ids::MOB,
+            &logger,
+        )
+        .unwrap();
         assert_eq!(result, SyncMonitorOk::NoMoreBlocks);
 
         let monitor_data = mobilecoind_db.get_monitor_data(&monitor_id).unwrap();
@@ -564,7 +584,14 @@ mod test {
         }
 
         // Calling sync_monitor again should not change the results.
-        let result = sync_monitor(&ledger_db, &mobilecoind_db, &monitor_id, &logger).unwrap();
+        let result = sync_monitor(
+            &ledger_db,
+            &mobilecoind_db,
+            &monitor_id,
+            token_ids::MOB,
+            &logger,
+        )
+        .unwrap();
         assert_eq!(result, SyncMonitorOk::NoMoreBlocks);
 
         let monitor_data = mobilecoind_db.get_monitor_data(&monitor_id).unwrap();
@@ -597,7 +624,14 @@ mod test {
             &mut rng,
         );
 
-        let result = sync_monitor(&ledger_db, &mobilecoind_db, &monitor_id, &logger).unwrap();
+        let result = sync_monitor(
+            &ledger_db,
+            &mobilecoind_db,
+            &monitor_id,
+            token_ids::MOB,
+            &logger,
+        )
+        .unwrap();
         assert_eq!(result, SyncMonitorOk::NoMoreBlocks);
 
         let utxos = mobilecoind_db
@@ -638,7 +672,14 @@ mod test {
         assert_eq!(mobilecoind_db.add_monitor(&data).unwrap(), monitor_id);
 
         // Sync.
-        let result = sync_monitor(&ledger_db, &mobilecoind_db, &monitor_id, &logger).unwrap();
+        let result = sync_monitor(
+            &ledger_db,
+            &mobilecoind_db,
+            &monitor_id,
+            token_ids::MOB,
+            &logger,
+        )
+        .unwrap();
         assert_eq!(result, SyncMonitorOk::NoMoreBlocks);
 
         // Should have a single non-zero utxo for our monitor.
@@ -658,7 +699,14 @@ mod test {
             &mut rng,
         );
 
-        let result = sync_monitor(&ledger_db, &mobilecoind_db, &monitor_id, &logger).unwrap();
+        let result = sync_monitor(
+            &ledger_db,
+            &mobilecoind_db,
+            &monitor_id,
+            token_ids::MOB,
+            &logger,
+        )
+        .unwrap();
         assert_eq!(result, SyncMonitorOk::NoMoreBlocks);
 
         // We should now have only a zero utxo.

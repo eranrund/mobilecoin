@@ -24,7 +24,9 @@ use mc_fog_test_infra::get_enclave_path;
 use mc_fog_uri::{ConnectionUri, FogLedgerUri};
 use mc_ledger_db::{Ledger, LedgerDB};
 use mc_transaction_core::{
-    ring_signature::KeyImage, tx::TxOut, Block, BlockContents, BlockSignature, BLOCK_VERSION,
+    ring_signature::KeyImage,
+    tx::{token_ids, TxOut},
+    Block, BlockContents, BlockSignature, BLOCK_VERSION,
 };
 use mc_util_from_random::FromRandom;
 use mc_util_test_helper::{CryptoRng, RngCore, RngType, SeedableRng};
@@ -733,6 +735,7 @@ fn add_block_to_ledger_db(
                 recipient,
                 &RistrettoPrivate::from_random(rng),
                 Default::default(),
+                token_ids::MOB,
             )
             .unwrap()
         })

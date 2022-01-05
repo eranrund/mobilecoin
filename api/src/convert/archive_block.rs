@@ -121,7 +121,7 @@ mod tests {
         encrypted_fog_hint::ENCRYPTED_FOG_HINT_LEN,
         membership_proofs::Range,
         ring_signature::KeyImage,
-        tx::{TxOut, TxOutMembershipElement, TxOutMembershipHash},
+        tx::{token_ids, TxOut, TxOutMembershipElement, TxOutMembershipHash},
         Amount, Block, BlockContents, BlockData, BlockID, BlockSignature,
     };
     use mc_util_from_random::FromRandom;
@@ -139,6 +139,7 @@ mod tests {
                 public_key: RistrettoPublic::from_random(&mut rng).into(),
                 e_fog_hint: (&[0u8; ENCRYPTED_FOG_HINT_LEN]).into(),
                 e_memo: None,
+                token_id: token_ids::MOB,
             };
             let key_image = KeyImage::from(block_idx);
 

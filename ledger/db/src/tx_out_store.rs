@@ -862,7 +862,7 @@ pub mod tx_out_store_tests {
         encrypted_fog_hint::{EncryptedFogHint, ENCRYPTED_FOG_HINT_LEN},
         membership_proofs::{hash_leaf, hash_nodes, Range, NIL_HASH},
         onetime_keys::*,
-        tx::TxOut,
+        tx::{token_ids, TxOut},
         Amount, MemoPayload,
     };
     use mc_util_from_random::FromRandom;
@@ -913,6 +913,7 @@ pub mod tx_out_store_tests {
                 public_key: public_key.into(),
                 e_fog_hint: EncryptedFogHint::new(&[7u8; ENCRYPTED_FOG_HINT_LEN]),
                 e_memo: Some(MemoPayload::default().encrypt(&shared_secret)),
+                token_id: token_ids::MOB,
             };
             tx_outs.push(tx_out);
         }

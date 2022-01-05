@@ -16,7 +16,7 @@ use mc_oblivious_traits::HeapORAMStorageCreator;
 use mc_transaction_core::{
     encrypted_fog_hint::EncryptedFogHint,
     fog_hint::{FogHint, PlaintextArray},
-    tx::TxOut,
+    tx::{token_ids, TxOut},
 };
 use mc_util_from_random::FromRandom;
 use mc_util_logger_macros::test_with_logger;
@@ -60,6 +60,7 @@ fn test_ingest_enclave(logger: Logger) {
                     &bob_account.default_subaddress(),
                     &tx_private_key,
                     e_fog_hint,
+                    token_ids::MOB,
                 )
                 .unwrap()
             })
@@ -227,6 +228,7 @@ fn test_ingest_enclave_malformed_txos(logger: Logger) {
                     &bob_account.default_subaddress(),
                     &tx_private_key,
                     e_fog_hint,
+                    token_ids::MOB,
                 )
                 .unwrap()
             })
@@ -363,7 +365,7 @@ fn test_ingest_enclave_overflow(logger: Logger) {
                     };
                     let tx_private_key = RistrettoPrivate::from_random(&mut rng);
                     let e_fog_hint = FogHint::from(pub_addr).encrypt(&fog_pubkey, &mut rng);
-                    TxOut::new(10, pub_addr, &tx_private_key, e_fog_hint).unwrap()
+                    TxOut::new(10, pub_addr, &tx_private_key, e_fog_hint, token_ids::MOB).unwrap()
                 })
                 .collect();
 

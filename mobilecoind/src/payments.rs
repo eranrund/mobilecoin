@@ -972,7 +972,10 @@ mod test {
     use mc_connection::{HardcodedCredentialsProvider, ThickClient};
     use mc_crypto_keys::RistrettoPrivate;
     use mc_fog_report_validation::MockFogPubkeyResolver;
-    use mc_transaction_core::constants::{MILLIMOB_TO_PICOMOB, MINIMUM_FEE};
+    use mc_transaction_core::{
+        constants::{MILLIMOB_TO_PICOMOB, MINIMUM_FEE},
+        tx::token_ids,
+    };
     use mc_util_from_random::FromRandom;
     use rand::{rngs::StdRng, SeedableRng};
 
@@ -986,6 +989,7 @@ mod test {
             &alice.default_subaddress(),
             &tx_secret_key_for_txo,
             Default::default(),
+            token_ids::MOB,
         )
         .unwrap();
 

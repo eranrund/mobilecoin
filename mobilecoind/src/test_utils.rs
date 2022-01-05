@@ -24,7 +24,9 @@ use mc_ledger_db::{Ledger, LedgerDB};
 use mc_ledger_sync::PollingNetworkState;
 use mc_mobilecoind_api::{mobilecoind_api_grpc::MobilecoindApiClient, MobilecoindUri};
 use mc_transaction_core::{
-    ring_signature::KeyImage, tx::TxOut, Block, BlockContents, BLOCK_VERSION,
+    ring_signature::KeyImage,
+    tx::{token_ids, TxOut},
+    Block, BlockContents, BLOCK_VERSION,
 };
 use mc_util_from_random::FromRandom;
 use mc_util_grpc::ConnectionUriGrpcioChannel;
@@ -167,6 +169,7 @@ pub fn add_block_to_ledger_db(
                 recipient,
                 &RistrettoPrivate::from_random(rng),
                 Default::default(),
+                token_ids::MOB,
             )
             .expect("Could not create TxOut");
             // The origin block does not have memos
@@ -274,6 +277,7 @@ pub fn setup_server<FPR: FogPubkeyResolver + Default + Send + Sync + 'static>(
         mobilecoind_db.clone(),
         conn_manager.clone(),
         fog_resolver_factory.unwrap_or(Arc::new(|_| Ok(FPR::default()))),
+        token_ids::MOB,
         logger.clone(),
     );
 
@@ -285,6 +289,7 @@ pub fn setup_server<FPR: FogPubkeyResolver + Default + Send + Sync + 'static>(
         network_state,
         uri,
         None,
+        token_ids::MOB,
         logger,
     );
 

@@ -215,7 +215,7 @@ mod test {
         encrypted_fog_hint::{EncryptedFogHint, ENCRYPTED_FOG_HINT_LEN},
         membership_proofs::Range,
         onetime_keys::{create_shared_secret, create_tx_out_public_key, create_tx_out_target_key},
-        tx::{TxOut, TxOutMembershipElement, TxOutMembershipProof},
+        tx::{token_ids, TxOut, TxOutMembershipElement, TxOutMembershipProof},
         Amount,
     };
     use mc_util_from_random::FromRandom;
@@ -251,6 +251,7 @@ mod test {
                 public_key: public_key.into(),
                 e_fog_hint: EncryptedFogHint::new(&[7u8; ENCRYPTED_FOG_HINT_LEN]),
                 e_memo: None,
+                token_id: token_ids::MOB,
             };
             tx_outs.push(tx_out);
         }

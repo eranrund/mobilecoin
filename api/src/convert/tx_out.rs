@@ -98,6 +98,7 @@ mod tests {
             public_key: RistrettoPublic::from_random(&mut rng).into(),
             e_fog_hint: (&[0u8; ENCRYPTED_FOG_HINT_LEN]).into(),
             e_memo: None,
+            token_id: 123,
         };
 
         let converted = external::TxOut::from(&source);
@@ -117,6 +118,7 @@ mod tests {
             public_key: RistrettoPublic::from_random(&mut rng).into(),
             e_fog_hint: (&[0u8; ENCRYPTED_FOG_HINT_LEN]).into(),
             e_memo: Some((*GenericArray::from_slice(&[9u8; 46])).into()),
+            token_id: 123,
         };
 
         let converted = external::TxOut::from(&source);
@@ -127,5 +129,6 @@ mod tests {
         assert_eq!(source.public_key, recovered_tx_out.public_key);
         assert_eq!(source.e_fog_hint, recovered_tx_out.e_fog_hint);
         assert_eq!(source.e_memo, recovered_tx_out.e_memo);
+        assert_eq!(source.token_id, recovered_tx_out.token_id);
     }
 }

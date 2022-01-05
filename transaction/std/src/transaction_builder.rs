@@ -451,7 +451,7 @@ pub mod transaction_builder_tests {
         onetime_keys::*,
         ring_signature::KeyImage,
         subaddress_matches_tx_out,
-        tx::TxOutMembershipProof,
+        tx::{token_ids, TxOutMembershipProof},
         validation::validate_signature,
     };
     use rand::{rngs::StdRng, SeedableRng};
@@ -481,6 +481,7 @@ pub mod transaction_builder_tests {
             recipient,
             hint,
             |_| Ok(Some(MemoPayload::default())),
+            token_ids::MOB,
             rng,
         )
     }
@@ -571,8 +572,11 @@ pub mod transaction_builder_tests {
         fog_resolver: FPR,
         rng: &mut RNG,
     ) -> Result<Tx, TxBuilderError> {
-        let mut transaction_builder =
-            TransactionBuilder::new(fog_resolver.clone(), EmptyMemoBuilder::default());
+        let mut transaction_builder = TransactionBuilder::new(
+            fog_resolver.clone(),
+            EmptyMemoBuilder::default(),
+            token_ids::MOB,
+        );
         let input_value = 1000;
         let output_value = 10;
 
@@ -611,7 +615,8 @@ pub mod transaction_builder_tests {
         let membership_proofs = input_credentials.membership_proofs.clone();
         let key_image = KeyImage::from(&input_credentials.onetime_private_key);
 
-        let mut transaction_builder = TransactionBuilder::new(fpr, EmptyMemoBuilder::default());
+        let mut transaction_builder =
+            TransactionBuilder::new(fpr, EmptyMemoBuilder::default(), token_ids::MOB);
 
         transaction_builder.add_input(input_credentials);
         let (_txout, confirmation) = transaction_builder
@@ -679,7 +684,7 @@ pub mod transaction_builder_tests {
         let key_image = KeyImage::from(&input_credentials.onetime_private_key);
 
         let mut transaction_builder =
-            TransactionBuilder::new(fog_resolver, EmptyMemoBuilder::default());
+            TransactionBuilder::new(fog_resolver, EmptyMemoBuilder::default(), token_ids::MOB);
 
         transaction_builder.add_input(input_credentials);
         let (_txout, confirmation) = transaction_builder
@@ -754,8 +759,11 @@ pub mod transaction_builder_tests {
                 },
         });
 
-        let mut transaction_builder =
-            TransactionBuilder::new(fog_resolver.clone(), EmptyMemoBuilder::default());
+        let mut transaction_builder = TransactionBuilder::new(
+            fog_resolver.clone(),
+            EmptyMemoBuilder::default(),
+            token_ids::MOB,
+        );
 
         let input_credentials = get_input_credentials(&sender, value, &fog_resolver, &mut rng);
         transaction_builder.add_input(input_credentials);
@@ -818,8 +826,11 @@ pub mod transaction_builder_tests {
         });
 
         {
-            let mut transaction_builder =
-                TransactionBuilder::new(fog_resolver.clone(), EmptyMemoBuilder::default());
+            let mut transaction_builder = TransactionBuilder::new(
+                fog_resolver.clone(),
+                EmptyMemoBuilder::default(),
+                token_ids::MOB,
+            );
 
             transaction_builder.set_tombstone_block(2000);
 
@@ -841,8 +852,11 @@ pub mod transaction_builder_tests {
         }
 
         {
-            let mut transaction_builder =
-                TransactionBuilder::new(fog_resolver.clone(), EmptyMemoBuilder::default());
+            let mut transaction_builder = TransactionBuilder::new(
+                fog_resolver.clone(),
+                EmptyMemoBuilder::default(),
+                token_ids::MOB,
+            );
 
             transaction_builder.set_tombstone_block(500);
 
@@ -890,8 +904,11 @@ pub mod transaction_builder_tests {
         });
 
         {
-            let mut transaction_builder =
-                TransactionBuilder::new(fog_resolver.clone(), EmptyMemoBuilder::default());
+            let mut transaction_builder = TransactionBuilder::new(
+                fog_resolver.clone(),
+                EmptyMemoBuilder::default(),
+                token_ids::MOB,
+            );
 
             transaction_builder.set_tombstone_block(2000);
 
@@ -1038,7 +1055,7 @@ pub mod transaction_builder_tests {
             memo_builder.enable_destination_memo();
 
             let mut transaction_builder =
-                TransactionBuilder::new(fog_resolver.clone(), memo_builder);
+                TransactionBuilder::new(fog_resolver.clone(), memo_builder, token_ids::MOB);
 
             transaction_builder.set_tombstone_block(2000);
 
@@ -1167,7 +1184,7 @@ pub mod transaction_builder_tests {
             memo_builder.enable_destination_memo();
 
             let mut transaction_builder =
-                TransactionBuilder::new(fog_resolver.clone(), memo_builder);
+                TransactionBuilder::new(fog_resolver.clone(), memo_builder, token_ids::MOB);
 
             transaction_builder.set_tombstone_block(2000);
             transaction_builder.set_fee(MINIMUM_FEE * 4).unwrap();
@@ -1298,7 +1315,7 @@ pub mod transaction_builder_tests {
             memo_builder.set_payment_request_id(42);
 
             let mut transaction_builder =
-                TransactionBuilder::new(fog_resolver.clone(), memo_builder);
+                TransactionBuilder::new(fog_resolver.clone(), memo_builder, token_ids::MOB);
 
             transaction_builder.set_tombstone_block(2000);
 
@@ -1428,7 +1445,7 @@ pub mod transaction_builder_tests {
             memo_builder.set_payment_request_id(47);
 
             let mut transaction_builder =
-                TransactionBuilder::new(fog_resolver.clone(), memo_builder);
+                TransactionBuilder::new(fog_resolver.clone(), memo_builder, token_ids::MOB);
 
             transaction_builder.set_tombstone_block(2000);
 
@@ -1546,7 +1563,7 @@ pub mod transaction_builder_tests {
             memo_builder.set_payment_request_id(47);
 
             let mut transaction_builder =
-                TransactionBuilder::new(fog_resolver.clone(), memo_builder);
+                TransactionBuilder::new(fog_resolver.clone(), memo_builder, token_ids::MOB);
 
             transaction_builder.set_tombstone_block(2000);
 
@@ -1689,7 +1706,7 @@ pub mod transaction_builder_tests {
             memo_builder.enable_destination_memo();
 
             let mut transaction_builder =
-                TransactionBuilder::new(fog_resolver.clone(), memo_builder);
+                TransactionBuilder::new(fog_resolver.clone(), memo_builder, token_ids::MOB);
 
             transaction_builder.set_tombstone_block(2000);
 
@@ -1840,7 +1857,7 @@ pub mod transaction_builder_tests {
             memo_builder.enable_destination_memo();
 
             let mut transaction_builder =
-                TransactionBuilder::new(fog_resolver.clone(), memo_builder);
+                TransactionBuilder::new(fog_resolver.clone(), memo_builder, token_ids::MOB);
 
             transaction_builder.set_tombstone_block(2000);
 
@@ -1928,7 +1945,8 @@ pub mod transaction_builder_tests {
         )
         .unwrap();
 
-        let mut transaction_builder = TransactionBuilder::new(fpr, EmptyMemoBuilder::default());
+        let mut transaction_builder =
+            TransactionBuilder::new(fpr, EmptyMemoBuilder::default(), token_ids::MOB);
         transaction_builder.add_input(input_credentials);
 
         let wrong_value = 999;

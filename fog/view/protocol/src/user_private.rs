@@ -111,7 +111,10 @@ mod testing {
     use mc_crypto_box::{CryptoBox, VersionedCryptoBox};
     use mc_crypto_keys::CompressedRistrettoPublic;
     use mc_fog_types::view::{FogTxOut, FogTxOutMetadata};
-    use mc_transaction_core::{fog_hint::FogHint, tx::TxOut};
+    use mc_transaction_core::{
+        fog_hint::FogHint,
+        tx::{token_ids, TxOut},
+    };
     pub use rand_core::{CryptoRng, RngCore, SeedableRng};
     use rand_hc::Hc128Rng;
 
@@ -150,6 +153,7 @@ mod testing {
             &recipient.default_subaddress(),
             &tx_private_key,
             hint.encrypt(&ingest_public, &mut rng),
+            token_ids::TOKEN1,
         )
         .unwrap();
 

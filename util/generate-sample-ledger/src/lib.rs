@@ -177,6 +177,7 @@ mod tests {
             10,
             &mut fixed_rng,
             Some(hint_slice),
+            token_ids::MOB,
             &logger,
         );
         let mut expected = [1u8; ENCRYPTED_FOG_HINT_LEN];
@@ -190,6 +191,7 @@ mod tests {
             10,
             &mut fixed_rng,
             Some(hint_slice),
+            token_ids::MOB,
             &logger,
         );
         let mut expected = [1u8; ENCRYPTED_FOG_HINT_LEN];
@@ -204,6 +206,7 @@ mod tests {
             10,
             &mut fixed_rng,
             Some(hint_slice),
+            token_ids::MOB,
             &logger,
         );
         let expected = [1u8; ENCRYPTED_FOG_HINT_LEN];

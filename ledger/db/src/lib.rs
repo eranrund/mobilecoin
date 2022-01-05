@@ -738,7 +738,7 @@ mod ledger_db_test {
     use core::convert::TryFrom;
     use mc_account_keys::AccountKey;
     use mc_crypto_keys::RistrettoPrivate;
-    use mc_transaction_core::compute_block_id;
+    use mc_transaction_core::{compute_block_id, tx::token_ids};
     use mc_util_from_random::FromRandom;
     use rand::{rngs::StdRng, SeedableRng};
     use rand_core::RngCore;
@@ -783,6 +783,7 @@ mod ledger_db_test {
                         &account_key.default_subaddress(),
                         &RistrettoPrivate::from_random(&mut rng),
                         Default::default(),
+                        token_ids::MOB,
                     )
                     .unwrap();
                     // Origin block doesn't have memos
@@ -841,6 +842,7 @@ mod ledger_db_test {
             &account_key.default_subaddress(),
             &RistrettoPrivate::from_random(&mut rng),
             Default::default(),
+            token_ids::MOB,
         )
         .unwrap();
         // Origin block transactions dont' have memos
@@ -899,6 +901,7 @@ mod ledger_db_test {
                     &recipient_account_key.default_subaddress(),
                     &RistrettoPrivate::from_random(&mut rng),
                     Default::default(),
+                    token_ids::MOB,
                 )
                 .unwrap()
             })
@@ -980,6 +983,7 @@ mod ledger_db_test {
                     &recipient_account_key.default_subaddress(),
                     &RistrettoPrivate::from_random(&mut rng),
                     Default::default(),
+                    token_ids::MOB,
                 )
                 .unwrap()
             })
@@ -1142,6 +1146,7 @@ mod ledger_db_test {
             &account_key.default_subaddress(),
             &RistrettoPrivate::from_random(&mut rng),
             Default::default(),
+            token_ids::MOB,
         )
         .unwrap();
         let outputs = vec![tx_out];
@@ -1187,6 +1192,7 @@ mod ledger_db_test {
             &account_key.default_subaddress(),
             &RistrettoPrivate::from_random(&mut rng),
             Default::default(),
+            token_ids::MOB,
         )
         .unwrap();
         let outputs = vec![tx_out];
@@ -1300,6 +1306,7 @@ mod ledger_db_test {
                             &recipient_account_key.default_subaddress(),
                             &RistrettoPrivate::from_random(&mut rng),
                             Default::default(),
+                            token_ids::MOB,
                         )
                         .unwrap()
                     })
@@ -1344,6 +1351,7 @@ mod ledger_db_test {
                         &recipient_account_key.default_subaddress(),
                         &RistrettoPrivate::from_random(&mut rng),
                         Default::default(),
+                        token_ids::MOB,
                     )
                     .unwrap()
                 })
@@ -1399,6 +1407,7 @@ mod ledger_db_test {
             &account_key.default_subaddress(),
             &RistrettoPrivate::from_random(&mut rng),
             Default::default(),
+            token_ids::MOB,
         )
         .unwrap();
 
@@ -1456,6 +1465,7 @@ mod ledger_db_test {
                 &account_key.default_subaddress(),
                 &RistrettoPrivate::from_random(&mut rng),
                 Default::default(),
+                token_ids::MOB,
             )
             .unwrap();
             let outputs = vec![tx_out];
@@ -1480,6 +1490,7 @@ mod ledger_db_test {
                 &account_key.default_subaddress(),
                 &RistrettoPrivate::from_random(&mut rng),
                 Default::default(),
+                token_ids::MOB,
             )
             .unwrap();
             let outputs = vec![tx_out];
@@ -1524,6 +1535,7 @@ mod ledger_db_test {
                 &account_key.default_subaddress(),
                 &RistrettoPrivate::from_random(&mut rng),
                 Default::default(),
+                token_ids::MOB,
             )
             .unwrap();
             tx_out.public_key = existing_tx_out.public_key.clone();
@@ -1585,6 +1597,7 @@ mod ledger_db_test {
                 &account_key.default_subaddress(),
                 &RistrettoPrivate::from_random(&mut rng),
                 Default::default(),
+                token_ids::MOB,
             )
             .unwrap();
 

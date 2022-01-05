@@ -491,7 +491,7 @@ mod combine_tests {
     use mc_ledger_db::test_utils::get_mock_ledger;
     use mc_transaction_core::{
         onetime_keys::recover_onetime_private_key,
-        tx::{TxOut, TxOutMembershipProof},
+        tx::{token_ids, TxOut, TxOutMembershipProof},
     };
     use mc_transaction_core_test_utils::{AccountKey, MockFogResolver};
     use mc_transaction_std::{EmptyMemoBuilder, InputCredentials, TransactionBuilder};
@@ -535,6 +535,7 @@ mod combine_tests {
             &alice.default_subaddress(),
             &tx_secret_key_for_txo,
             Default::default(),
+            token_ids::MOB,
         )
         .unwrap();
 
@@ -568,8 +569,11 @@ mod combine_tests {
         )
         .unwrap();
 
-        let mut transaction_builder =
-            TransactionBuilder::new(MockFogResolver::default(), EmptyMemoBuilder::default());
+        let mut transaction_builder = TransactionBuilder::new(
+            MockFogResolver::default(),
+            EmptyMemoBuilder::default(),
+            token_ids::MOB,
+        );
         transaction_builder.add_input(input_credentials);
         transaction_builder.set_fee(0).unwrap();
         transaction_builder
@@ -607,6 +611,7 @@ mod combine_tests {
                     &alice.default_subaddress(),
                     &tx_secret_key_for_txo,
                     Default::default(),
+                    token_ids::MOB,
                 )
                 .unwrap();
 
@@ -618,6 +623,7 @@ mod combine_tests {
                 let mut transaction_builder = TransactionBuilder::new(
                     MockFogResolver::default(),
                     EmptyMemoBuilder::default(),
+                    token_ids::MOB,
                 );
 
                 // Create InputCredentials to spend the TxOut.
@@ -679,6 +685,7 @@ mod combine_tests {
             &alice.default_subaddress(),
             &RistrettoPrivate::from_random(&mut rng),
             Default::default(),
+            token_ids::MOB,
         )
         .unwrap();
 
@@ -709,8 +716,11 @@ mod combine_tests {
             )
             .unwrap();
 
-            let mut transaction_builder =
-                TransactionBuilder::new(MockFogResolver::default(), EmptyMemoBuilder::default());
+            let mut transaction_builder = TransactionBuilder::new(
+                MockFogResolver::default(),
+                EmptyMemoBuilder::default(),
+                token_ids::MOB,
+            );
             transaction_builder.add_input(input_credentials);
             transaction_builder.set_fee(0).unwrap();
             transaction_builder
@@ -742,8 +752,11 @@ mod combine_tests {
             )
             .unwrap();
 
-            let mut transaction_builder =
-                TransactionBuilder::new(MockFogResolver::default(), EmptyMemoBuilder::default());
+            let mut transaction_builder = TransactionBuilder::new(
+                MockFogResolver::default(),
+                EmptyMemoBuilder::default(),
+                token_ids::MOB,
+            );
             transaction_builder.add_input(input_credentials);
             transaction_builder.set_fee(0).unwrap();
             transaction_builder
@@ -766,6 +779,7 @@ mod combine_tests {
                 &alice.default_subaddress(),
                 &tx_secret_key_for_txo,
                 Default::default(),
+                token_ids::MOB,
             )
             .unwrap();
             let tx_public_key_for_txo = RistrettoPublic::try_from(&tx_out.public_key).unwrap();
@@ -798,8 +812,11 @@ mod combine_tests {
             )
             .unwrap();
 
-            let mut transaction_builder =
-                TransactionBuilder::new(MockFogResolver::default(), EmptyMemoBuilder::default());
+            let mut transaction_builder = TransactionBuilder::new(
+                MockFogResolver::default(),
+                EmptyMemoBuilder::default(),
+                token_ids::MOB,
+            );
             transaction_builder.add_input(input_credentials);
             transaction_builder.set_fee(0).unwrap();
             transaction_builder
@@ -835,6 +852,7 @@ mod combine_tests {
             &alice.default_subaddress(),
             &RistrettoPrivate::from_random(&mut rng),
             Default::default(),
+            token_ids::MOB,
         )
         .unwrap();
 
@@ -843,6 +861,7 @@ mod combine_tests {
             &alice.default_subaddress(),
             &RistrettoPrivate::from_random(&mut rng),
             Default::default(),
+            token_ids::MOB,
         )
         .unwrap();
 
@@ -879,8 +898,11 @@ mod combine_tests {
             )
             .unwrap();
 
-            let mut transaction_builder =
-                TransactionBuilder::new(MockFogResolver::default(), EmptyMemoBuilder::default());
+            let mut transaction_builder = TransactionBuilder::new(
+                MockFogResolver::default(),
+                EmptyMemoBuilder::default(),
+                token_ids::MOB,
+            );
             transaction_builder.add_input(input_credentials);
             transaction_builder.set_fee(0).unwrap();
             transaction_builder
@@ -913,8 +935,11 @@ mod combine_tests {
             )
             .unwrap();
 
-            let mut transaction_builder =
-                TransactionBuilder::new(MockFogResolver::default(), EmptyMemoBuilder::default());
+            let mut transaction_builder = TransactionBuilder::new(
+                MockFogResolver::default(),
+                EmptyMemoBuilder::default(),
+                token_ids::MOB,
+            );
             transaction_builder.add_input(input_credentials);
             transaction_builder.set_fee(0).unwrap();
             transaction_builder
@@ -938,6 +963,7 @@ mod combine_tests {
                 &alice.default_subaddress(),
                 &tx_secret_key_for_txo,
                 Default::default(),
+                token_ids::MOB,
             )
             .unwrap();
             let tx_public_key_for_txo = RistrettoPublic::try_from(&tx_out.public_key).unwrap();
@@ -970,8 +996,11 @@ mod combine_tests {
             )
             .unwrap();
 
-            let mut transaction_builder =
-                TransactionBuilder::new(MockFogResolver::default(), EmptyMemoBuilder::default());
+            let mut transaction_builder = TransactionBuilder::new(
+                MockFogResolver::default(),
+                EmptyMemoBuilder::default(),
+                token_ids::MOB,
+            );
             transaction_builder.add_input(input_credentials);
             transaction_builder.set_fee(0).unwrap();
             transaction_builder

@@ -200,7 +200,7 @@ pub fn compute_block_id(
 mod block_tests {
     use crate::{
         membership_proofs::Range,
-        tx::{TxOut, TxOutMembershipElement, TxOutMembershipHash},
+        tx::{token_ids, TxOut, TxOutMembershipElement, TxOutMembershipHash},
         Block, BlockContents, BlockContentsHash, BlockID, BLOCK_VERSION,
     };
     use alloc::vec::Vec;
@@ -228,6 +228,7 @@ mod block_tests {
                     &recipient.default_subaddress(),
                     &RistrettoPrivate::from_random(rng),
                     Default::default(),
+                    token_ids::MOB,
                 )
                 .unwrap()
             })

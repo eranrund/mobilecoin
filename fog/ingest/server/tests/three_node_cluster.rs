@@ -22,7 +22,7 @@ use mc_transaction_core::{
     encrypted_fog_hint::EncryptedFogHint,
     membership_proofs::Range,
     ring_signature::KeyImage,
-    tx::{TxOut, TxOutMembershipElement, TxOutMembershipHash},
+    tx::{token_ids, TxOut, TxOutMembershipElement, TxOutMembershipHash},
     Amount, Block, BlockContents, BlockData, BlockSignature, BLOCK_VERSION,
 };
 use mc_util_from_random::FromRandom;
@@ -160,6 +160,7 @@ fn random_output<T: RngCore + CryptoRng>(rng: &mut T) -> Vec<TxOut> {
         public_key: RistrettoPublic::from_random(rng).into(),
         e_fog_hint: EncryptedFogHint::default(),
         e_memo: None,
+        token_id: token_ids::MOB,
     }]
 }
 

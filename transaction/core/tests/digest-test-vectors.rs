@@ -1,7 +1,11 @@
 use mc_account_keys::AccountKey;
 use mc_crypto_digestible_test_utils::*;
 use mc_crypto_keys::RistrettoPrivate;
-use mc_transaction_core::{encrypted_fog_hint::EncryptedFogHint, tx::TxOut, Block, BlockContents};
+use mc_transaction_core::{
+    encrypted_fog_hint::EncryptedFogHint,
+    tx::{token_ids, TxOut},
+    Block, BlockContents,
+};
 use mc_util_from_random::FromRandom;
 use rand_core::{RngCore, SeedableRng};
 use rand_hc::Hc128Rng as FixedRng;
@@ -24,6 +28,7 @@ fn test_origin_tx_outs() -> Vec<TxOut> {
                 &acct.default_subaddress(),
                 &RistrettoPrivate::from_random(&mut rng),
                 EncryptedFogHint::fake_onetime_hint(&mut rng),
+                token_ids::MOB,
             )
             .expect("Could not create TxOut");
             // Origin TxOuts do not have encrypted memo fields.

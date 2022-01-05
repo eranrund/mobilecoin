@@ -11,7 +11,7 @@ use mc_fog_report_api_test_utils::{round_trip_message, round_trip_protobuf_objec
 use mc_transaction_core::{
     encrypted_fog_hint::EncryptedFogHint,
     membership_proofs::Range,
-    tx::{TxOut, TxOutMembershipElement, TxOutMembershipHash, TxOutMembershipProof},
+    tx::{token_ids, TxOut, TxOutMembershipElement, TxOutMembershipHash, TxOutMembershipProof},
     Amount, EncryptedMemo,
 };
 use mc_util_from_random::FromRandom;
@@ -451,6 +451,7 @@ impl Sample for TxOut {
             public_key: RistrettoPublic::from_random(rng).into(),
             e_fog_hint: EncryptedFogHint::fake_onetime_hint(rng),
             e_memo: Option::<EncryptedMemo>::sample(rng),
+            token_id: token_ids::MOB,
         }
     }
 }

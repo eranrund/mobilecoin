@@ -173,7 +173,7 @@ mod test {
     use super::*;
     use mc_crypto_keys::RistrettoPublic;
     use mc_ledger_db::Ledger;
-    use mc_transaction_core::{encrypted_fog_hint::ENCRYPTED_FOG_HINT_LEN, Amount};
+    use mc_transaction_core::{encrypted_fog_hint::ENCRYPTED_FOG_HINT_LEN, tx::token_ids, Amount};
     use mc_transaction_core_test_utils::{
         create_ledger, create_transaction, initialize_ledger, AccountKey,
     };
@@ -192,6 +192,7 @@ mod test {
             public_key: RistrettoPublic::from_random(&mut rng).into(),
             e_fog_hint: (&[0u8; ENCRYPTED_FOG_HINT_LEN]).into(),
             e_memo: Some(Default::default()),
+            token_id: token_ids::TOKEN1,
         };
 
         let subaddress_index = 123;
@@ -277,6 +278,7 @@ mod test {
                 public_key: RistrettoPublic::from_random(&mut rng).into(),
                 e_fog_hint: (&[0u8; ENCRYPTED_FOG_HINT_LEN]).into(),
                 e_memo: Some(Default::default()),
+                token_id: token_ids::TOKEN1,
             };
 
             let subaddress_index = 123;

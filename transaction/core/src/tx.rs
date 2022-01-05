@@ -581,7 +581,7 @@ mod tests {
         memo::MemoPayload,
         ring_signature::SignatureRctBulletproofs,
         subaddress_matches_tx_out,
-        tx::{Tx, TxIn, TxOut, TxPrefix},
+        tx::{token_ids, Tx, TxIn, TxOut, TxPrefix},
         Amount,
     };
     use alloc::vec::Vec;
@@ -607,6 +607,7 @@ mod tests {
                 public_key,
                 e_fog_hint: EncryptedFogHint::from(&[1u8; ENCRYPTED_FOG_HINT_LEN]),
                 e_memo: Default::default(),
+                token_id: token_ids::MOB,
             }
         };
 
@@ -642,7 +643,11 @@ mod tests {
         // TODO: use a meaningful signature.
         let signature = SignatureRctBulletproofs::default();
 
-        let tx = Tx { prefix, signature };
+        let tx = Tx {
+            prefix,
+            signature,
+            token_id: token_ids::MOB,
+        };
 
         let mut buf = Vec::new();
         tx.encode(&mut buf).expect("failed to serialize into slice");
@@ -665,6 +670,7 @@ mod tests {
                 public_key,
                 e_fog_hint: EncryptedFogHint::from(&[1u8; ENCRYPTED_FOG_HINT_LEN]),
                 e_memo: Some(MemoPayload::default().encrypt(&shared_secret)),
+                token_id: token_ids::MOB,
             }
         };
 
@@ -700,7 +706,11 @@ mod tests {
         // TODO: use a meaningful signature.
         let signature = SignatureRctBulletproofs::default();
 
-        let tx = Tx { prefix, signature };
+        let tx = Tx {
+            prefix,
+            signature,
+            token_id: token_ids::MOB,
+        };
 
         let mut buf = Vec::new();
         tx.encode(&mut buf).expect("failed to serialize into slice");
@@ -723,8 +733,14 @@ mod tests {
             let tx_private_key = RistrettoPrivate::from_random(&mut rng);
 
             // A tx out with an empty memo
-            let mut tx_out =
-                TxOut::new(13u64, &bob_addr, &tx_private_key, Default::default()).unwrap();
+            let mut tx_out = TxOut::new(
+                13u64,
+                &bob_addr,
+                &tx_private_key,
+                Default::default(),
+                token_ids::MOB,
+            )
+            .unwrap();
             assert!(
                 tx_out.e_memo.is_some(),
                 "All TxOut (except preexisting) should have a memo"
@@ -763,6 +779,7 @@ mod tests {
                 &tx_private_key,
                 Default::default(),
                 |_| Ok(Some(memo_val.clone())),
+                token_ids::MOB,
             )
             .unwrap();
 
@@ -796,6 +813,7 @@ mod tests {
                 &tx_private_key,
                 Default::default(),
                 |_| Ok(Some(memo_val.clone())),
+                token_ids::MOB,
             )
             .unwrap();
 
