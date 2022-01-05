@@ -357,7 +357,7 @@ impl TxOut {
             public_key: public_key.into(),
             e_fog_hint: hint,
             e_memo,
-            token_id: token_id as i32,
+            token_id,
         })
     }
 

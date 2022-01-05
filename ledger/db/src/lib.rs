@@ -295,7 +295,7 @@ impl Ledger for LedgerDB {
             .get_tx_out_by_index(index, &db_transaction)
     }
 
-    /// TODO
+    /// Gets a TxOut of a specific token id by its index in the ledger.
     fn get_tx_out_by_token_id_and_index(
         &self,
         token_id: i32,

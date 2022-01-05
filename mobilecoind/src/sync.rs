@@ -356,7 +356,8 @@ fn match_tx_outs_into_utxos(
     let mut results = Vec::new();
 
     for tx_out in outputs {
-        log::info!(logger, "BOO {} {}", token_id, tx_out.token_id);
+        // Skip any tx outs with a token id that is different than the one we are
+        // configured for.
         if tx_out.token_id != token_id {
             continue;
         }

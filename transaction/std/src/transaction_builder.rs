@@ -110,7 +110,7 @@ impl<FPR: FogPubkeyResolver> TransactionBuilder<FPR> {
         if input_credentials
             .ring
             .iter()
-            .any(|tx_out| tx_out.token_id != self.token_id as i32)
+            .any(|tx_out| tx_out.token_id != self.token_id)
         {
             // TODO
             panic!("input_credentials.ring must be all the same token_id");
@@ -378,7 +378,7 @@ impl<FPR: FogPubkeyResolver> TransactionBuilder<FPR> {
         Ok(Tx {
             prefix: tx_prefix,
             signature,
-            token_id: self.token_id as i32,
+            token_id: self.token_id,
         })
     }
 }

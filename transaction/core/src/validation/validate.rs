@@ -70,7 +70,8 @@ pub fn validate<R: RngCore + CryptoRng>(
     Ok(())
 }
 
-/// TODO
+/// The transaction must have a valid token_id, and all inputs and outputs must
+/// be of the same token id.
 fn validate_token_id(tx_prefix: &TxPrefix, token_id: i32) -> TransactionValidationResult<()> {
     if token_id < 0 {
         return Err(TransactionValidationError::InvalidTokenId);

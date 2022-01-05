@@ -57,7 +57,7 @@ pub trait Ledger: Send {
     /// Gets a TxOut by its index in the ledger.
     fn get_tx_out_by_index(&self, index: u64) -> Result<TxOut, Error>;
 
-    /// TODO
+    /// Gets a TxOut of a specific token id by its index in the ledger.
     fn get_tx_out_by_token_id_and_index(
         &self,
         token_id: i32,

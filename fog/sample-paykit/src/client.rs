@@ -82,6 +82,7 @@ pub struct Client {
 
 impl Client {
     /// Create a new sample paykit object
+    #[allow(clippy::too_many_arguments)]
     pub fn new(
         consensus_service_conn: ThickClient<HardcodedCredentialsProvider>,
         fog_view: FogViewGrpcClient,

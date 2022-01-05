@@ -536,7 +536,6 @@ impl ConsensusEnclave for SgxConsensusEnclave {
             key_images.extend(tx.key_images().iter().cloned());
         }
 
-        // TODO
         // Collect total fee amount per token id
         let mut fees_by_token_id = HashMap::<i32, u64>::default();
         for tx in &transactions {

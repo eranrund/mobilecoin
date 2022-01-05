@@ -233,7 +233,7 @@ impl TxOutStore {
         Ok(tx_out)
     }
 
-    /// Gets a TxOut by its index, filtering by a to
+    /// Gets a TxOut of a specific token id by its index in the ledger.
     pub fn get_tx_out_by_token_id_and_index<T: Transaction>(
         &self,
         token_id: i32,
@@ -478,7 +478,8 @@ fn containing_range(index: u64, depth: u32) -> (u64, u64) {
     (low, high)
 }
 
-/// TODO
+/// Given a token id and index, return a byte array that is used as a key
+/// in the database table that maps (token_id, index) -> absolute tx out index.
 fn token_id_and_index_key(token_id: i32, index: u64) -> Vec<u8> {
     let mut key = vec![];
     key.extend_from_slice(&token_id.to_be_bytes());

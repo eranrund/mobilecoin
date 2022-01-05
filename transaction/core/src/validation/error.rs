@@ -123,13 +123,13 @@ pub enum TransactionValidationError {
     /// Public keys must be valid Ristretto points.
     KeyError,
 
-    /// A TxOut is missing the required memo field
+    /// A TxOut is missing the required memo field.
     MissingMemo,
 
-    /// TODO
+    /// Encountered an invalid token id.
     InvalidTokenId,
 
-    /// TODO
+    /// Token id is not the same on all TxOuts.
     InconsistentTokenId,
 }
 

@@ -228,7 +228,7 @@ impl TxOutRecord {
                 .map(|e_memo| e_memo.into())
                 .unwrap_or_default(),
             tx_out_global_index: meta.global_index,
-            tx_out_token_id: fog_tx_out.token_id as i32,
+            tx_out_token_id: fog_tx_out.token_id,
             block_index: meta.block_index,
             timestamp: meta.timestamp,
         }
@@ -305,7 +305,6 @@ pub struct FogTxOut {
     pub e_memo: Option<EncryptedMemo>,
 
     /// The token id
-    /// TODO what does this break?
     pub token_id: i32,
 }
 
@@ -368,7 +367,7 @@ impl FogTxOut {
             public_key: self.public_key,
             e_fog_hint: EncryptedFogHint::from(&[0u8; ENCRYPTED_FOG_HINT_LEN]),
             e_memo: self.e_memo,
-            token_id: self.token_id as i32,
+            token_id: self.token_id,
         })
     }
 }

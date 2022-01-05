@@ -156,7 +156,12 @@ fn main() {
         crossbeam_channel::unbounded::<SpendableTxOut>();
 
     while let Ok(block_contents) = ledger_db.get_block_contents(block_count) {
-        let transactions = block_contents.outputs;
+        let transactions: Vec<TxOut> = block_contents
+            .outputs
+            .into_iter()
+            .filter(|tx_out| tx_out.token_id == token_ids::MOB)
+            .collect();
+
         // Only get num_transactions per account for the first block, then assume
         // future blocks that were bootstrapped are similar
         if num_transactions_per_account == 0 {
