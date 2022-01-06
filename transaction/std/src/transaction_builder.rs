@@ -1456,7 +1456,7 @@ pub mod transaction_builder_tests {
             transaction_builder.set_tombstone_block(2000);
 
             let input_credentials = get_input_credentials(&sender, value, &fog_resolver, &mut rng);
-            transaction_builder.add_input(input_credentials);
+            transaction_builder.add_input(input_credentials).unwrap();
 
             let (_txout, _confirmation) = transaction_builder
                 .add_output(
@@ -2043,5 +2043,86 @@ pub mod transaction_builder_tests {
         let mut expected_inputs = inputs.clone();
         expected_inputs.sort_by(|a, b| a.ring[0].public_key.cmp(&b.ring[0].public_key));
         assert_eq!(inputs, expected_inputs);
+    }
+
+    #[test]
+    // TransactionBuilder enforces uniform token ids and create outputs with the
+    // correct token id.
+    fn test_transaction_builder_token_id() {
+        let mut rng: StdRng = SeedableRng::from_seed([1u8; 32]);
+        let sender = AccountKey::random(&mut rng);
+        let recipient = AccountKey::random_with_fog(&mut rng);
+        let ingest_private_key = RistrettoPrivate::from_random(&mut rng);
+
+        let fog_resolver = MockFogResolver(btreemap! {
+                            recipient
+                    .default_subaddress()
+                    .fog_report_url()
+                    .unwrap()
+                    .to_string()
+            =>
+                FullyValidatedFogPubkey {
+                    pubkey: RistrettoPublic::from(&ingest_private_key),
+                    pubkey_expiry: 1000,
+                },
+        });
+
+        let value = 1475 * MILLIMOB_TO_PICOMOB;
+
+        let mut input_credentials = get_input_credentials(&sender, value, &fog_resolver, &mut rng);
+
+        let mut transaction_builder =
+            TransactionBuilder::new(fog_resolver, EmptyMemoBuilder::default(), token_ids::TOKEN1);
+
+        // This should fail since the input was initially created with the MOB token id.
+        assert!(transaction_builder
+            .add_input(input_credentials.clone())
+            .is_err());
+
+        // Modifying just the first element in the ring is not sufficient.
+        input_credentials.ring[0].token_id = token_ids::TOKEN1;
+        assert!(transaction_builder
+            .add_input(input_credentials.clone())
+            .is_err());
+
+        assert_eq!(transaction_builder.input_credentials.len(), 0);
+
+        // Modify the entire ring to some other token, we should fail.
+        for tx_out in input_credentials.ring.iter_mut() {
+            tx_out.token_id = token_ids::TOKEN1 + 1;
+        }
+        assert!(transaction_builder
+            .add_input(input_credentials.clone())
+            .is_err());
+
+        // Modify the entire ring, we should then succeed.
+        for tx_out in input_credentials.ring.iter_mut() {
+            tx_out.token_id = token_ids::TOKEN1;
+        }
+        transaction_builder.add_input(input_credentials).unwrap();
+
+        let (_txout, _confirmation) = transaction_builder
+            .add_output(
+                value - MINIMUM_FEE,
+                &recipient.default_subaddress(),
+                &mut rng,
+            )
+            .unwrap();
+
+        let tx = transaction_builder.build(&mut rng).unwrap();
+
+        // The transaction should have a single input.
+        assert_eq!(tx.prefix.inputs.len(), 1);
+
+        // The transaction should have one output.
+        assert_eq!(tx.prefix.outputs.len(), 1);
+
+        let output: &TxOut = tx.prefix.outputs.get(0).unwrap();
+
+        // The output should belong to the correct recipient.
+        assert!(subaddress_matches_tx_out(&recipient, DEFAULT_SUBADDRESS_INDEX, &output).unwrap());
+
+        // The output should be of the correct token id
+        assert_eq!(output.token_id, token_ids::TOKEN1);
     }
 }
