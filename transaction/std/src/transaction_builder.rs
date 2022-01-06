@@ -106,17 +106,18 @@ impl<FPR: FogPubkeyResolver> TransactionBuilder<FPR> {
     /// # Arguments
     /// * `input_credentials` - Credentials required to construct a ring
     ///   signature for an input.
-    pub fn add_input(&mut self, input_credentials: InputCredentials) {
+    pub fn add_input(&mut self, input_credentials: InputCredentials) -> Result<(), TxBuilderError> {
         if input_credentials
             .ring
             .iter()
             .any(|tx_out| tx_out.token_id != self.token_id)
         {
-            // TODO
-            panic!("input_credentials.ring must be all the same token_id");
+            return Err(TxBuilderError::InvalidTokenId);
         }
 
         self.input_credentials.push(input_credentials);
+
+        Ok(())
     }
 
     /// Add a non-change output to the transaction.
@@ -588,7 +589,7 @@ pub mod transaction_builder_tests {
         // Inputs
         for _i in 0..num_inputs {
             let input_credentials = get_input_credentials(sender, input_value, &fog_resolver, rng);
-            transaction_builder.add_input(input_credentials);
+            transaction_builder.add_input(input_credentials).unwrap();
         }
 
         // Outputs
@@ -623,7 +624,7 @@ pub mod transaction_builder_tests {
         let mut transaction_builder =
             TransactionBuilder::new(fpr, EmptyMemoBuilder::default(), token_ids::MOB);
 
-        transaction_builder.add_input(input_credentials);
+        transaction_builder.add_input(input_credentials).unwrap();
         let (_txout, confirmation) = transaction_builder
             .add_output(
                 value - MINIMUM_FEE,
@@ -691,7 +692,7 @@ pub mod transaction_builder_tests {
         let mut transaction_builder =
             TransactionBuilder::new(fog_resolver, EmptyMemoBuilder::default(), token_ids::MOB);
 
-        transaction_builder.add_input(input_credentials);
+        transaction_builder.add_input(input_credentials).unwrap();
         let (_txout, confirmation) = transaction_builder
             .add_output(
                 value - MINIMUM_FEE,
@@ -771,7 +772,7 @@ pub mod transaction_builder_tests {
         );
 
         let input_credentials = get_input_credentials(&sender, value, &fog_resolver, &mut rng);
-        transaction_builder.add_input(input_credentials);
+        transaction_builder.add_input(input_credentials).unwrap();
 
         let (_txout, _confirmation) = transaction_builder
             .add_output_with_fog_hint_address(
@@ -840,7 +841,7 @@ pub mod transaction_builder_tests {
             transaction_builder.set_tombstone_block(2000);
 
             let input_credentials = get_input_credentials(&sender, value, &fog_resolver, &mut rng);
-            transaction_builder.add_input(input_credentials);
+            transaction_builder.add_input(input_credentials).unwrap();
 
             let (_txout, _confirmation) = transaction_builder
                 .add_output(value - MINIMUM_FEE, &recipient_address, &mut rng)
@@ -866,7 +867,7 @@ pub mod transaction_builder_tests {
             transaction_builder.set_tombstone_block(500);
 
             let input_credentials = get_input_credentials(&sender, value, &fog_resolver, &mut rng);
-            transaction_builder.add_input(input_credentials);
+            transaction_builder.add_input(input_credentials).unwrap();
 
             let (_txout, _confirmation) = transaction_builder
                 .add_output(value - MINIMUM_FEE, &recipient_address, &mut rng)
@@ -918,7 +919,7 @@ pub mod transaction_builder_tests {
             transaction_builder.set_tombstone_block(2000);
 
             let input_credentials = get_input_credentials(&sender, value, &fog_resolver, &mut rng);
-            transaction_builder.add_input(input_credentials);
+            transaction_builder.add_input(input_credentials).unwrap();
 
             let (_txout, _confirmation) = transaction_builder
                 .add_output(
@@ -1065,7 +1066,7 @@ pub mod transaction_builder_tests {
             transaction_builder.set_tombstone_block(2000);
 
             let input_credentials = get_input_credentials(&sender, value, &fog_resolver, &mut rng);
-            transaction_builder.add_input(input_credentials);
+            transaction_builder.add_input(input_credentials).unwrap();
 
             let (_txout, _confirmation) = transaction_builder
                 .add_output(
@@ -1195,7 +1196,7 @@ pub mod transaction_builder_tests {
             transaction_builder.set_fee(MINIMUM_FEE * 4).unwrap();
 
             let input_credentials = get_input_credentials(&sender, value, &fog_resolver, &mut rng);
-            transaction_builder.add_input(input_credentials);
+            transaction_builder.add_input(input_credentials).unwrap();
 
             let (_txout, _confirmation) = transaction_builder
                 .add_output(
@@ -1325,7 +1326,7 @@ pub mod transaction_builder_tests {
             transaction_builder.set_tombstone_block(2000);
 
             let input_credentials = get_input_credentials(&sender, value, &fog_resolver, &mut rng);
-            transaction_builder.add_input(input_credentials);
+            transaction_builder.add_input(input_credentials).unwrap();
 
             let (_txout, _confirmation) = transaction_builder
                 .add_output(
@@ -1573,7 +1574,7 @@ pub mod transaction_builder_tests {
             transaction_builder.set_tombstone_block(2000);
 
             let input_credentials = get_input_credentials(&sender, value, &fog_resolver, &mut rng);
-            transaction_builder.add_input(input_credentials);
+            transaction_builder.add_input(input_credentials).unwrap();
 
             let (_txout, _confirmation) = transaction_builder
                 .add_output(
@@ -1716,7 +1717,7 @@ pub mod transaction_builder_tests {
             transaction_builder.set_tombstone_block(2000);
 
             let input_credentials = get_input_credentials(&alice, value, &fog_resolver, &mut rng);
-            transaction_builder.add_input(input_credentials);
+            transaction_builder.add_input(input_credentials).unwrap();
 
             let (_txout, _confirmation) = transaction_builder
                 .add_output(value - change_value - MINIMUM_FEE, &bob_address, &mut rng)
@@ -1867,7 +1868,7 @@ pub mod transaction_builder_tests {
             transaction_builder.set_tombstone_block(2000);
 
             let input_credentials = get_input_credentials(&sender, value, &fog_resolver, &mut rng);
-            transaction_builder.add_input(input_credentials);
+            transaction_builder.add_input(input_credentials).unwrap();
 
             let (_txout, _confirmation) = transaction_builder
                 .add_output(
@@ -1952,7 +1953,7 @@ pub mod transaction_builder_tests {
 
         let mut transaction_builder =
             TransactionBuilder::new(fpr, EmptyMemoBuilder::default(), token_ids::MOB);
-        transaction_builder.add_input(input_credentials);
+        transaction_builder.add_input(input_credentials).unwrap();
 
         let wrong_value = 999;
         transaction_builder

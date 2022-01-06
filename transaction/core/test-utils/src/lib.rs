@@ -128,7 +128,7 @@ pub fn create_transaction_with_amount<L: Ledger, R: RngCore + CryptoRng>(
         *sender.view_private_key(),
     )
     .unwrap();
-    transaction_builder.add_input(input_credentials);
+    transaction_builder.add_input(input_credentials).unwrap();
 
     // Output
     transaction_builder

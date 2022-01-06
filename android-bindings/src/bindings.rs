@@ -1172,7 +1172,7 @@ pub unsafe extern "C" fn Java_com_mobilecoin_lib_TransactionBuilder_add_1input(
             *onetime_private_key,
             *view_private_key,
         )?;
-        tx_builder.add_input(input_credentials);
+        tx_builder.add_input(input_credentials)?;
 
         Ok(())
     })

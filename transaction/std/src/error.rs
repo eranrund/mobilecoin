@@ -44,6 +44,9 @@ pub enum TxBuilderError {
 
     /// Memo: {0}
     Memo(NewMemoError),
+
+    /// Invalid token id
+    InvalidTokenId,
 }
 
 impl From<mc_util_serial::encode::Error> for TxBuilderError {

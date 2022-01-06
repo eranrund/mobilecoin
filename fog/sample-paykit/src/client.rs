@@ -672,7 +672,7 @@ fn build_transaction_helper<T: RngCore + CryptoRng, FPR: FogPubkeyResolver>(
                 *source_account_key.view_private_key(),
             )
             .or(Err(Error::BrokenRing(ring_len, real_key_index)))?,
-        );
+        ).map_err(|e| Error::AddInput(e))?;
     }
 
     // Resolve account server key if the receiver specifies an account service in

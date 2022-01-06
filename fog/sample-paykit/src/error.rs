@@ -70,6 +70,9 @@ pub enum Error {
     /// Insufficient TxOuts in blockchain: Needed {0}, found {1}
     InsufficientTxOutsInBlockchain(usize, usize),
 
+    /// Error adding tx input: {0}
+    AddInput(TxBuilderError),
+
     /// Error adding tx outputs: {0}
     AddOutput(TxBuilderError),
 

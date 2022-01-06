@@ -865,8 +865,8 @@ impl<T: BlockchainConnection + UserTxConnection + 'static, FPR: FogPubkeyResolve
                     onetime_private_key,
                     *from_account_key.view_private_key(),
                 )
-                .map_err(|_| Error::TxBuild("failed creating InputCredentials".into()))?,
-            );
+                .map_err(|e| Error::TxBuild(format!("failed creating InputCredentials: {}", e)))?,
+            ).map_err(|e| Error::TxBuild(format!("failed adding input: {}", e)))?;
         }
 
         // Add outputs to our destinations.

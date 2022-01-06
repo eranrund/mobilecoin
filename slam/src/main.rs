@@ -575,16 +575,18 @@ fn build_tx(
             public_key
         );
 
-        tx_builder.add_input(
-            InputCredentials::new(
-                ring,
-                membership_proofs,
-                real_key_index,
-                onetime_private_key,
-                *utxo.from_account_key.view_private_key(),
+        tx_builder
+            .add_input(
+                InputCredentials::new(
+                    ring,
+                    membership_proofs,
+                    real_key_index,
+                    onetime_private_key,
+                    *utxo.from_account_key.view_private_key(),
+                )
+                .expect("InputCredentials::new failed"),
             )
-            .expect("add_input failed"),
-        );
+            .expect("add_input failed");
     }
 
     // Add ouputs

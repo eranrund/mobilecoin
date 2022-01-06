@@ -574,7 +574,7 @@ mod combine_tests {
             EmptyMemoBuilder::default(),
             token_ids::MOB,
         );
-        transaction_builder.add_input(input_credentials);
+        transaction_builder.add_input(input_credentials).unwrap();
         transaction_builder.set_fee(0).unwrap();
         transaction_builder
             .add_output(123, &bob.default_subaddress(), &mut rng)
@@ -651,7 +651,7 @@ mod combine_tests {
                     *alice.view_private_key(),
                 )
                 .unwrap();
-                transaction_builder.add_input(input_credentials);
+                transaction_builder.add_input(input_credentials).unwrap();
                 transaction_builder.set_fee(0).unwrap();
                 transaction_builder
                     .add_output(88, &bob.default_subaddress(), &mut rng)
@@ -721,7 +721,7 @@ mod combine_tests {
                 EmptyMemoBuilder::default(),
                 token_ids::MOB,
             );
-            transaction_builder.add_input(input_credentials);
+            transaction_builder.add_input(input_credentials).unwrap();
             transaction_builder.set_fee(0).unwrap();
             transaction_builder
                 .add_output(123, &bob.default_subaddress(), &mut rng)
@@ -757,7 +757,7 @@ mod combine_tests {
                 EmptyMemoBuilder::default(),
                 token_ids::MOB,
             );
-            transaction_builder.add_input(input_credentials);
+            transaction_builder.add_input(input_credentials).unwrap();
             transaction_builder.set_fee(0).unwrap();
             transaction_builder
                 .add_output(123, &recipient_account.default_subaddress(), &mut rng)
@@ -817,7 +817,7 @@ mod combine_tests {
                 EmptyMemoBuilder::default(),
                 token_ids::MOB,
             );
-            transaction_builder.add_input(input_credentials);
+            transaction_builder.add_input(input_credentials).unwrap();
             transaction_builder.set_fee(0).unwrap();
             transaction_builder
                 .add_output(123, &recipient_account.default_subaddress(), &mut rng)
@@ -903,7 +903,7 @@ mod combine_tests {
                 EmptyMemoBuilder::default(),
                 token_ids::MOB,
             );
-            transaction_builder.add_input(input_credentials);
+            transaction_builder.add_input(input_credentials).unwrap();
             transaction_builder.set_fee(0).unwrap();
             transaction_builder
                 .add_output(123, &bob.default_subaddress(), &mut rng)
@@ -940,7 +940,7 @@ mod combine_tests {
                 EmptyMemoBuilder::default(),
                 token_ids::MOB,
             );
-            transaction_builder.add_input(input_credentials);
+            transaction_builder.add_input(input_credentials).unwrap();
             transaction_builder.set_fee(0).unwrap();
             transaction_builder
                 .add_output(123, &recipient_account.default_subaddress(), &mut rng)
@@ -1001,7 +1001,7 @@ mod combine_tests {
                 EmptyMemoBuilder::default(),
                 token_ids::MOB,
             );
-            transaction_builder.add_input(input_credentials);
+            transaction_builder.add_input(input_credentials).unwrap();
             transaction_builder.set_fee(0).unwrap();
             transaction_builder
                 .add_output(123, &recipient_account.default_subaddress(), &mut rng)

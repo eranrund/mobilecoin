@@ -401,7 +401,9 @@ pub extern "C" fn mc_transaction_builder_add_input(
             view_private_key, // `a`
         )
         .map_err(|err| LibMcError::InvalidInput(format!("{:?}", err)))?;
-        transaction_builder.add_input(input_credential);
+        transaction_builder
+            .add_input(input_credential)
+            .map_err(|err| LibMcError::InvalidInput(format!("{:?}", err)))?;
 
         Ok(())
     })
