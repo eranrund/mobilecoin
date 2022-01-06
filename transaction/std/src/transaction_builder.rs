@@ -333,7 +333,13 @@ impl<FPR: FogPubkeyResolver> TransactionBuilder<FPR> {
         let (outputs, _shared_serets): (Vec<TxOut>, Vec<_>) =
             self.outputs_and_shared_secrets.into_iter().unzip();
 
-        let tx_prefix = TxPrefix::new(inputs, outputs, self.fee, self.tombstone_block);
+        let tx_prefix = TxPrefix::new(
+            inputs,
+            outputs,
+            self.fee,
+            self.tombstone_block,
+            self.token_id,
+        );
 
         let mut rings: Vec<Vec<(CompressedRistrettoPublic, CompressedCommitment)>> = Vec::new();
         for input in &tx_prefix.inputs {
@@ -378,7 +384,6 @@ impl<FPR: FogPubkeyResolver> TransactionBuilder<FPR> {
         Ok(Tx {
             prefix: tx_prefix,
             signature,
-            token_id: self.token_id,
         })
     }
 }

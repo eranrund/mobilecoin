@@ -10,7 +10,6 @@ impl From<&tx::Tx> for external::Tx {
         let mut tx = external::Tx::new();
         tx.set_prefix(external::TxPrefix::from(&source.prefix));
         tx.set_signature(external::SignatureRctBulletproofs::from(&source.signature));
-        tx.set_token_id(source.token_id);
 
         tx
     }
@@ -23,12 +22,7 @@ impl TryFrom<&external::Tx> for tx::Tx {
     fn try_from(source: &external::Tx) -> Result<Self, Self::Error> {
         let prefix = tx::TxPrefix::try_from(source.get_prefix())?;
         let signature = SignatureRctBulletproofs::try_from(source.get_signature())?;
-        let token_id = source.get_token_id();
-        Ok(tx::Tx {
-            prefix,
-            signature,
-            token_id,
-        })
+        Ok(tx::Tx { prefix, signature })
     }
 }
 
@@ -151,7 +145,7 @@ mod tests {
         const TOKEN_ID: i32 = 102030;
 
         let mut tx = get_test_tx();
-        tx.token_id = TOKEN_ID;
+        tx.prefix.token_id = TOKEN_ID;
 
         for input in tx.prefix.inputs.iter_mut() {
             for tx_out in input.ring.iter_mut() {

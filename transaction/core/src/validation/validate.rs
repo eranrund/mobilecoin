@@ -34,7 +34,7 @@ pub fn validate<R: RngCore + CryptoRng>(
     minimum_fee: u64,
     csprng: &mut R,
 ) -> TransactionValidationResult<()> {
-    validate_token_id(&tx.prefix, tx.token_id)?;
+    validate_token_id(&tx.prefix)?;
 
     validate_number_of_inputs(&tx.prefix, MAX_INPUTS)?;
 
@@ -72,13 +72,17 @@ pub fn validate<R: RngCore + CryptoRng>(
 
 /// The transaction must have a valid token_id, and all inputs and outputs must
 /// be of the same token id.
-fn validate_token_id(tx_prefix: &TxPrefix, token_id: i32) -> TransactionValidationResult<()> {
-    if token_id < 0 {
+fn validate_token_id(tx_prefix: &TxPrefix) -> TransactionValidationResult<()> {
+    if tx_prefix.token_id < 0 {
         return Err(TransactionValidationError::InvalidTokenId);
     }
 
     for input in tx_prefix.inputs.iter() {
-        if input.ring.iter().any(|tx_out| tx_out.token_id != token_id) {
+        if input
+            .ring
+            .iter()
+            .any(|tx_out| tx_out.token_id != tx_prefix.token_id)
+        {
             return Err(TransactionValidationError::InconsistentTokenId);
         }
     }
@@ -86,7 +90,7 @@ fn validate_token_id(tx_prefix: &TxPrefix, token_id: i32) -> TransactionValidati
     if tx_prefix
         .outputs
         .iter()
-        .any(|tx_out| tx_out.token_id != token_id)
+        .any(|tx_out| tx_out.token_id != tx_prefix.token_id)
     {
         return Err(TransactionValidationError::InconsistentTokenId);
     }
@@ -1039,10 +1043,10 @@ mod tests {
     /// Should return InvalodTokenId if the token id is negative.
     fn test_validate_token_id_negative() {
         let (mut tx, _ledger) = create_test_tx();
-        tx.token_id = -1;
+        tx.prefix.token_id = -1;
 
         assert_eq!(
-            validate_token_id(&tx.prefix, tx.token_id),
+            validate_token_id(&tx.prefix),
             Err(TransactionValidationError::InvalidTokenId)
         );
     }
@@ -1054,19 +1058,19 @@ mod tests {
         let (tx, _ledger) = create_test_tx();
 
         // A sanity that an unmodified transaction is valid.
-        assert_eq!(validate_token_id(&tx.prefix, tx.token_id), Ok(()));
+        assert_eq!(validate_token_id(&tx.prefix), Ok(()));
 
         let mut tx1 = tx.clone();
         tx1.prefix.outputs[0].token_id = 1;
         assert_eq!(
-            validate_token_id(&tx1.prefix, tx1.token_id),
+            validate_token_id(&tx1.prefix),
             Err(TransactionValidationError::InconsistentTokenId)
         );
 
         let mut tx2 = tx.clone();
         tx2.prefix.inputs[0].ring[0].token_id = 1;
         assert_eq!(
-            validate_token_id(&tx2.prefix, tx2.token_id),
+            validate_token_id(&tx2.prefix),
             Err(TransactionValidationError::InconsistentTokenId)
         );
     }

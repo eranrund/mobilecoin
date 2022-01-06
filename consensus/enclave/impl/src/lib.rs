@@ -539,7 +539,7 @@ impl ConsensusEnclave for SgxConsensusEnclave {
         // Collect total fee amount per token id
         let mut fees_by_token_id = HashMap::<i32, u64>::default();
         for tx in &transactions {
-            *fees_by_token_id.entry(tx.token_id).or_insert(0) += tx.prefix.fee;
+            *fees_by_token_id.entry(tx.prefix.token_id).or_insert(0) += tx.prefix.fee;
         }
 
         // Create fee output per token id

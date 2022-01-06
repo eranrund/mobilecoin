@@ -113,10 +113,6 @@ pub struct Tx {
     /// The transaction signature.
     #[prost(message, required, tag = "2")]
     pub signature: SignatureRctBulletproofs,
-
-    /// Token id for this transaction.
-    #[prost(int32, tag = "3")]
-    pub token_id: i32,
 }
 
 impl fmt::Display for Tx {
@@ -171,6 +167,10 @@ pub struct TxPrefix {
     /// The block index at which this transaction is no longer valid.
     #[prost(uint64, tag = "4")]
     pub tombstone_block: u64,
+
+    /// Token id for this transaction.
+    #[prost(int32, tag = "5")]
+    pub token_id: i32,
 }
 
 impl TxPrefix {
@@ -182,12 +182,20 @@ impl TxPrefix {
     /// * `fee` - Transaction fee.
     /// * `tombstone_block` - The block index at which this transaction is no
     ///   longer valid.
-    pub fn new(inputs: Vec<TxIn>, outputs: Vec<TxOut>, fee: u64, tombstone_block: u64) -> TxPrefix {
+    /// * `token_id` - Token id for this transaction.
+    pub fn new(
+        inputs: Vec<TxIn>,
+        outputs: Vec<TxOut>,
+        fee: u64,
+        tombstone_block: u64,
+        token_id: i32,
+    ) -> TxPrefix {
         TxPrefix {
             inputs,
             outputs,
             fee,
             tombstone_block,
+            token_id,
         }
     }
 
@@ -248,7 +256,7 @@ pub struct TxOut {
     #[prost(message, required, tag = "2")]
     pub target_key: CompressedRistrettoPublic,
 
-    /// The per output tx public key
+    /// The per output tx public key.
     #[prost(message, required, tag = "3")]
     pub public_key: CompressedRistrettoPublic,
 
@@ -260,7 +268,7 @@ pub struct TxOut {
     #[prost(message, tag = "5")]
     pub e_memo: Option<EncryptedMemo>,
 
-    /// TODO
+    /// The token id.
     #[prost(int32, tag = "6")]
     pub token_id: i32,
 }
@@ -631,6 +639,7 @@ mod tests {
             outputs: vec![tx_out],
             fee: MINIMUM_FEE,
             tombstone_block: 23,
+            token_id: token_ids::MOB,
         };
 
         let mut buf = Vec::new();
@@ -643,11 +652,7 @@ mod tests {
         // TODO: use a meaningful signature.
         let signature = SignatureRctBulletproofs::default();
 
-        let tx = Tx {
-            prefix,
-            signature,
-            token_id: token_ids::MOB,
-        };
+        let tx = Tx { prefix, signature };
 
         let mut buf = Vec::new();
         tx.encode(&mut buf).expect("failed to serialize into slice");
@@ -694,6 +699,7 @@ mod tests {
             outputs: vec![tx_out],
             fee: MINIMUM_FEE,
             tombstone_block: 23,
+            token_id: token_ids::MOB,
         };
 
         let mut buf = Vec::new();
@@ -709,7 +715,6 @@ mod tests {
         let tx = Tx {
             prefix,
             signature,
-            token_id: token_ids::MOB,
         };
 
         let mut buf = Vec::new();
