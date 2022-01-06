@@ -270,6 +270,7 @@ pub struct TxOut {
 
     /// The token id.
     #[prost(int32, tag = "6")]
+    #[digestible(omit_when = 0)]
     pub token_id: i32,
 }
 
