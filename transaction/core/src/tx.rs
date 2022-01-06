@@ -675,7 +675,7 @@ mod tests {
                 public_key,
                 e_fog_hint: EncryptedFogHint::from(&[1u8; ENCRYPTED_FOG_HINT_LEN]),
                 e_memo: Some(MemoPayload::default().encrypt(&shared_secret)),
-                token_id: token_ids::MOB,
+                token_id: token_ids::TOKEN1,
             }
         };
 
@@ -699,7 +699,7 @@ mod tests {
             outputs: vec![tx_out],
             fee: MINIMUM_FEE,
             tombstone_block: 23,
-            token_id: token_ids::MOB,
+            token_id: token_ids::TOKEN1,
         };
 
         let mut buf = Vec::new();
@@ -712,10 +712,7 @@ mod tests {
         // TODO: use a meaningful signature.
         let signature = SignatureRctBulletproofs::default();
 
-        let tx = Tx {
-            prefix,
-            signature,
-        };
+        let tx = Tx { prefix, signature };
 
         let mut buf = Vec::new();
         tx.encode(&mut buf).expect("failed to serialize into slice");

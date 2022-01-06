@@ -567,6 +567,23 @@ mod tests {
             );
             assert_eq!(validate_membership_proofs(&tx.prefix, &root_proofs), Ok(()));
         }
+
+        // Modify an input token_id which should invalidate the proof.
+        {
+            let mut tx1 = tx.clone();
+            tx1.prefix.inputs[0].ring[0].token_id = 123;
+
+            let highest_indices = tx1.get_membership_proof_highest_indices();
+            let root_proofs: Vec<TxOutMembershipProof> = adapt_hack(
+                &ledger
+                    .get_tx_out_proof_of_memberships(&highest_indices)
+                    .expect("failed getting proofs"),
+            );
+            assert_eq!(
+                validate_membership_proofs(&tx1.prefix, &root_proofs),
+                Err(TransactionValidationError::MembershipProofValidationError)
+            );
+        }
     }
 
     #[test]
@@ -884,12 +901,25 @@ mod tests {
     // Should return InvalidTransactionSignature if an input is modified.
     fn test_transaction_signature_err_modified_input() {
         let mut rng: StdRng = SeedableRng::from_seed([1u8; 32]);
-        let (mut tx, _ledger) = create_test_tx();
+        let (tx, _ledger) = create_test_tx();
 
         // Remove an input.
-        tx.prefix.inputs[0].ring.pop();
+        let mut tx1 = tx.clone();
+        tx1.prefix.inputs[0].ring.pop();
 
-        match validate_signature(&tx, &mut rng) {
+        match validate_signature(&tx1, &mut rng) {
+            Err(TransactionValidationError::InvalidTransactionSignature(_e)) => {} // Expected.
+            Err(e) => {
+                panic!("Unexpected error {}", e);
+            }
+            Ok(()) => panic!("Unexpected success"),
+        }
+
+        // Change token id
+        let mut tx2 = tx.clone();
+        tx2.prefix.inputs[0].ring[0].token_id = 10;
+
+        match validate_signature(&tx2, &mut rng) {
             Err(TransactionValidationError::InvalidTransactionSignature(_e)) => {} // Expected.
             Err(e) => {
                 panic!("Unexpected error {}", e);
@@ -902,13 +932,26 @@ mod tests {
     // Should return InvalidTransactionSignature if an output is modified.
     fn test_transaction_signature_err_modified_output() {
         let mut rng: StdRng = SeedableRng::from_seed([1u8; 32]);
-        let (mut tx, _ledger) = create_test_tx();
+        let (tx, _ledger) = create_test_tx();
 
         // Add an output.
-        let output = tx.prefix.outputs.get(0).unwrap().clone();
-        tx.prefix.outputs.push(output);
+        let mut tx1 = tx.clone();
+        let output = tx1.prefix.outputs.get(0).unwrap().clone();
+        tx1.prefix.outputs.push(output);
 
-        match validate_signature(&tx, &mut rng) {
+        match validate_signature(&tx1, &mut rng) {
+            Err(TransactionValidationError::InvalidTransactionSignature(_e)) => {} // Expected.
+            Err(e) => {
+                panic!("Unexpected error {}", e);
+            }
+            Ok(()) => panic!("Unexpected success"),
+        }
+
+        //  Change token id.
+        let mut tx2 = tx.clone();
+        tx2.prefix.outputs[0].token_id = 10;
+
+        match validate_signature(&tx2, &mut rng) {
             Err(TransactionValidationError::InvalidTransactionSignature(_e)) => {} // Expected.
             Err(e) => {
                 panic!("Unexpected error {}", e);
@@ -924,6 +967,23 @@ mod tests {
         let (mut tx, _ledger) = create_test_tx();
 
         tx.prefix.fee = tx.prefix.fee + 1;
+
+        match validate_signature(&tx, &mut rng) {
+            Err(TransactionValidationError::InvalidTransactionSignature(_e)) => {} // Expected.
+            Err(e) => {
+                panic!("Unexpected error {}", e);
+            }
+            Ok(()) => panic!("Unexpected success"),
+        }
+    }
+
+    #[test]
+    // Should return InvalidTransactionSignature if the token id is modified.
+    fn test_transaction_signature_err_modified_token_id() {
+        let mut rng: StdRng = SeedableRng::from_seed([1u8; 32]);
+        let (mut tx, _ledger) = create_test_tx();
+
+        tx.prefix.token_id = tx.prefix.token_id + 1;
 
         match validate_signature(&tx, &mut rng) {
             Err(TransactionValidationError::InvalidTransactionSignature(_e)) => {} // Expected.
