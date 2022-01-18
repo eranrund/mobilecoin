@@ -480,7 +480,7 @@ fn containing_range(index: u64, depth: u32) -> (u64, u64) {
 
 /// Given a token id and index, return a byte array that is used as a key
 /// in the database table that maps (token_id, index) -> absolute tx out index.
-fn token_id_and_index_key(token_id: i32, index: u64) -> Vec<u8> {
+pub fn token_id_and_index_key(token_id: i32, index: u64) -> Vec<u8> {
     let mut key = vec![];
     key.extend_from_slice(&token_id.to_be_bytes());
     key.extend_from_slice(&index.to_be_bytes());

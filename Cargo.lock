@@ -4498,6 +4498,7 @@ dependencies = [
  "lmdb-rkv",
  "mc-common",
  "mc-ledger-db",
+ "mc-transaction-core",
  "mc-util-lmdb",
  "mc-util-serial",
  "serde",

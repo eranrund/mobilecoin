@@ -4,12 +4,22 @@
 //! backward-incompatible changes.
 
 use lmdb::{DatabaseFlags, Environment, Transaction, WriteFlags};
-use mc_common::logger::{create_app_logger, log, o, Logger};
-use mc_ledger_db::{
-    key_bytes_to_u64, tx_out_store::TX_OUT_INDEX_BY_PUBLIC_KEY_DB_NAME, u64_to_key_bytes, Error,
-    LedgerDbMetadataStoreSettings, MetadataStore, TxOutStore, TxOutsByBlockValue,
-    BLOCK_NUMBER_BY_TX_OUT_INDEX, COUNTS_DB_NAME, NUM_BLOCKS_KEY, TX_OUTS_BY_BLOCK_DB_NAME,
+use mc_common::{
+    logger::{create_app_logger, log, o, Logger},
+    HashMap,
 };
+use mc_ledger_db::{
+    key_bytes_to_u64,
+    tx_out_store::{
+        token_id_and_index_key, COUNTS_DB_NAME as TX_OUT_COUNTS_DB_NAME,
+        NUM_TX_OUTS_BY_TOKEN_ID_KEY, NUM_TX_OUTS_KEY, TX_OUT_BY_INDEX_DB_NAME,
+        TX_OUT_INDEX_BY_PUBLIC_KEY_DB_NAME, TX_OUT_INDEX_BY_TOKEN_ID_AND_INDEX_DB_NAME,
+    },
+    u64_to_key_bytes, Error, LedgerDbMetadataStoreSettings, MetadataStore, TxOutStore,
+    TxOutsByBlockValue, BLOCK_NUMBER_BY_TX_OUT_INDEX, COUNTS_DB_NAME, NUM_BLOCKS_KEY,
+    TX_OUTS_BY_BLOCK_DB_NAME,
+};
+use mc_transaction_core::tx::TxOut;
 use mc_util_lmdb::MetadataStoreError;
 use mc_util_serial::decode;
 use std::{path::PathBuf, thread::sleep, time::Duration};
@@ -95,6 +105,26 @@ fn main() {
                 );
                 db_txn.commit().expect("Failed committing transaction");
             }
+
+            // Version 20220118 introduced per-token-id tx out indexing.
+            Err(MetadataStoreError::VersionIncompatible(20200707, 20220118)) => {
+                log::info!(logger, "Ledger db migrating from version 20200707 to 20220118, this might take awhile...");
+
+                construct_tx_out_index_by_token_id_and_index_from_existing_data(&env, &logger)
+                    .expect("Failed constructing tx_out_index_by_token_id_and_index database");
+
+                let mut db_txn = env.begin_rw_txn().expect("Failed starting rw transaction");
+                metadata_store
+                    .set_version_to_latest(&mut db_txn)
+                    .expect("Failed setting metadata version");
+                log::info!(
+                    logger,
+                    "Ledger db migration complete, now at version: {:?}",
+                    metadata_store.get_version(&db_txn),
+                );
+                db_txn.commit().expect("Failed committing transaction");
+            }
+
             // Don't know how to migrate.
             Err(err) => {
                 panic!("Error while migrating: {:?}", err);
@@ -207,5 +237,78 @@ fn construct_block_number_by_tx_out_index_from_existing_data(
             );
         }
     }
+    Ok(db_txn.commit()?)
+}
+
+/// A utility function for constructing the tx_out_index_by_token_id_and_index
+/// store using existing data.
+fn construct_tx_out_index_by_token_id_and_index_from_existing_data(
+    env: &Environment,
+    logger: &Logger,
+) -> Result<(), Error> {
+    // When constructing the tx out index by token id and index database, we first
+    // need to create it.
+    let tx_out_index_by_token_id_and_index_db = env.create_db(
+        Some(TX_OUT_INDEX_BY_TOKEN_ID_AND_INDEX_DB_NAME),
+        DatabaseFlags::empty(),
+    )?;
+
+    // Open pre-existing databases that has data we need.
+    let tx_out_by_index_db = env.open_db(Some(TX_OUT_BY_INDEX_DB_NAME))?;
+    let counts_db = env.open_db(Some(TX_OUT_COUNTS_DB_NAME))?;
+
+    // After the database has been created, populate it with the existing data.
+    let mut db_txn = env.begin_rw_txn()?;
+
+    let num_tx_outs = key_bytes_to_u64(db_txn.get(counts_db, &NUM_TX_OUTS_KEY)?);
+    log::info!(logger, "Need to process {} tx outs", num_tx_outs);
+
+    let mut percents: u64 = 0;
+    let mut highest_index_by_token_id: HashMap<i32, u64> = HashMap::default();
+    for tx_out_global_index in 0..num_tx_outs {
+        // Get the tx out
+        let bytes = db_txn.get(tx_out_by_index_db, &u64_to_key_bytes(tx_out_global_index))?;
+        let tx_out: TxOut = decode(bytes)?;
+
+        // Figure out the token-id-specific index for this tx out.
+        let next_token_id_index =
+            if let Some(index) = highest_index_by_token_id.get(&tx_out.token_id) {
+                *index + 1
+            } else {
+                0
+            };
+
+        // Update per-token count
+        db_txn.put(
+            counts_db,
+            &format!("{}:{}", NUM_TX_OUTS_BY_TOKEN_ID_KEY, tx_out.token_id),
+            &u64_to_key_bytes(next_token_id_index + 1),
+            WriteFlags::empty(),
+        )?;
+
+        // Update per-token index map
+        let key = token_id_and_index_key(tx_out.token_id, next_token_id_index);
+        db_txn.put(
+            tx_out_index_by_token_id_and_index_db,
+            &key,
+            &u64_to_key_bytes(tx_out_global_index),
+            WriteFlags::NO_OVERWRITE,
+        )?;
+
+        // Throttled logging.
+        let new_percents = tx_out_global_index * 100 / num_tx_outs;
+        if new_percents != percents {
+            percents = new_percents;
+            log::info!(
+                logger,
+                "Constructing tx_out_index_by_token_id_and_index_db: {}% complete",
+                percents
+            );
+        }
+
+        // Store highest index.
+        highest_index_by_token_id.insert(tx_out.token_id, next_token_id_index);
+    }
+
     Ok(db_txn.commit()?)
 }
