@@ -1666,6 +1666,7 @@ mod ledger_db_test {
             20,
             35,
             &origin_block,
+            &[token_ids::MOB],
             &mut rng,
         );
 
@@ -1676,6 +1677,161 @@ mod ledger_db_test {
         }
     }
 
+    #[test]
+    // ledger.num_txos_by_token_id returns correct count
+    fn num_txos_by_token_id_returns_correct_count() {
+        let mut rng: StdRng = SeedableRng::from_seed([1u8; 32]);
+        let mut ledger_db = create_db();
+
+        let origin_account_key = AccountKey::random(&mut rng);
+        let (origin_block, origin_block_contents) =
+            get_origin_block_and_contents(&origin_account_key);
+        ledger_db
+            .append_block(&origin_block, &origin_block_contents, None)
+            .unwrap();
+
+        // Currently the ledger only a single txo with token id 0
+        assert_eq!(ledger_db.num_txos().unwrap(), 1);
+        assert_eq!(ledger_db.num_txos_by_token_id(0).unwrap(), 1);
+        assert_eq!(ledger_db.num_txos_by_token_id(1).unwrap(), 0);
+        assert_eq!(ledger_db.num_txos_by_token_id(i32::MAX).unwrap(), 0);
+
+        // Make random recipients
+        let accounts: Vec<AccountKey> = (0..20).map(|_i| AccountKey::random(&mut rng)).collect();
+        let recipient_pub_keys = accounts
+            .iter()
+            .map(|account| account.default_subaddress())
+            .collect::<Vec<_>>();
+
+        // Get some random blocks with 3 token ids
+        let results: Vec<(Block, BlockContents)> = mc_transaction_core_test_utils::get_blocks(
+            &recipient_pub_keys[..],
+            20,
+            20,
+            35,
+            &origin_block,
+            &[token_ids::MOB, 1, 5],
+            &mut rng,
+        );
+
+        let mut tokens_mob = 1;
+        let mut tokens_1 = 0;
+        let mut tokens_5 = 0;
+
+        for (block, block_contents) in &results {
+            ledger_db.append_block(block, block_contents, None).unwrap();
+
+            for tx_out in &block_contents.outputs {
+                match tx_out.token_id {
+                    token_ids::MOB => tokens_mob += 1,
+                    1 => tokens_1 += 1,
+                    5 => tokens_5 += 1,
+                    _ => panic!("unexpected token id"),
+                }
+            }
+
+            assert_eq!(ledger_db.num_txos_by_token_id(0).unwrap(), tokens_mob);
+            assert_eq!(ledger_db.num_txos_by_token_id(1).unwrap(), tokens_1);
+            assert_eq!(ledger_db.num_txos_by_token_id(5).unwrap(), tokens_5);
+            assert_eq!(ledger_db.num_txos_by_token_id(6).unwrap(), 0);
+        }
+    }
+
+    #[test]
+    // ledger.get_tx_out_by_token_id_and_index returns correct tx out
+    fn get_tx_out_by_token_id_and_index_returns_correct_tx_out() {
+        let mut rng: StdRng = SeedableRng::from_seed([1u8; 32]);
+        let mut ledger_db = create_db();
+
+        let origin_account_key = AccountKey::random(&mut rng);
+        let (origin_block, origin_block_contents) =
+            get_origin_block_and_contents(&origin_account_key);
+        ledger_db
+            .append_block(&origin_block, &origin_block_contents, None)
+            .unwrap();
+
+        // Make random recipients
+        let accounts: Vec<AccountKey> = (0..20).map(|_i| AccountKey::random(&mut rng)).collect();
+        let recipient_pub_keys = accounts
+            .iter()
+            .map(|account| account.default_subaddress())
+            .collect::<Vec<_>>();
+
+        // Get some random blocks with 3 token ids
+        let results: Vec<(Block, BlockContents)> = mc_transaction_core_test_utils::get_blocks(
+            &recipient_pub_keys[..],
+            20,
+            20,
+            35,
+            &origin_block,
+            &[token_ids::MOB, 1, 5],
+            &mut rng,
+        );
+
+        let mut tx_outs_mob = vec![ledger_db.get_tx_out_by_index(0).unwrap()];
+        let mut tx_outs_token_1 = vec![];
+        let mut tx_outs_token_5 = vec![];
+
+        for (block, block_contents) in &results {
+            ledger_db.append_block(block, block_contents, None).unwrap();
+
+            for tx_out in &block_contents.outputs {
+                match tx_out.token_id {
+                    token_ids::MOB => tx_outs_mob.push(tx_out.clone()),
+                    1 => tx_outs_token_1.push(tx_out.clone()),
+                    5 => tx_outs_token_5.push(tx_out.clone()),
+                    _ => panic!("unexpected token id"),
+                }
+            }
+        }
+
+        // Sanity
+        assert_eq!(
+            ledger_db.num_txos_by_token_id(0).unwrap(),
+            tx_outs_mob.len() as u64
+        );
+        assert_eq!(
+            ledger_db.num_txos_by_token_id(1).unwrap(),
+            tx_outs_token_1.len() as u64
+        );
+        assert_eq!(
+            ledger_db.num_txos_by_token_id(5).unwrap(),
+            tx_outs_token_5.len() as u64
+        );
+        assert_eq!(ledger_db.num_txos_by_token_id(6).unwrap(), 0);
+
+        // Getting tx out by token id and index should return the correct tx out
+        for (i, tx_out) in tx_outs_mob.iter().enumerate() {
+            let (tx_out2, global_index) = ledger_db
+                .get_tx_out_by_token_id_and_index(0, i as u64)
+                .unwrap();
+
+            assert_eq!(*tx_out, tx_out2);
+
+            assert_eq!(
+                global_index,
+                ledger_db
+                    .get_tx_out_index_by_public_key(&tx_out.public_key)
+                    .unwrap()
+            );
+        }
+
+        // Invalid indices should return not found
+        assert_eq!(
+            ledger_db.get_tx_out_by_token_id_and_index(0, u64::max_value()),
+            Err(Error::NotFound)
+        );
+
+        assert_eq!(
+            ledger_db.get_tx_out_by_token_id_and_index(0, tx_outs_mob.len() as u64),
+            Err(Error::NotFound)
+        );
+
+        assert_eq!(
+            ledger_db.get_tx_out_by_token_id_and_index(3, 0),
+            Err(Error::NotFound)
+        );
+    }
     // FIXME(MC-526): If these benches are not marked ignore, they get run during
     // cargo test and they are not compiled with optimizations which makes them
     // take several minutes I think they should probably be moved to

@@ -55,6 +55,7 @@ fn test_blockchain() -> Vec<(Block, BlockContents)> {
         50,
         50,
         &origin,
+        &[token_ids::MOB],
         &mut rng,
     )
 }

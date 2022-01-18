@@ -244,12 +244,14 @@ pub fn initialize_ledger<L: Ledger, R: RngCore + CryptoRng>(
 }
 
 /// Generate a list of blocks, each with a random number of transactions.
+/// Token ids are selected in a round-robin fashion.
 pub fn get_blocks<T: Rng + RngCore + CryptoRng>(
     recipients: &[PublicAddress],
     n_blocks: usize,
     min_txs_per_block: usize,
     max_txs_per_block: usize,
     initial_block: &Block,
+    token_ids: &[i32],
     rng: &mut T,
 ) -> Vec<(Block, BlockContents)> {
     assert!(!recipients.is_empty());
@@ -268,7 +270,7 @@ pub fn get_blocks<T: Rng + RngCore + CryptoRng>(
                 )
             })
             .collect();
-        let outputs = get_outputs(&recipient_and_amount, rng);
+        let outputs = get_outputs(&recipient_and_amount, token_ids, rng);
 
         // Non-origin blocks must have at least one key image.
         let key_images = vec![KeyImage::from(block_index as u64)];
@@ -293,19 +295,24 @@ pub fn get_blocks<T: Rng + RngCore + CryptoRng>(
 }
 
 /// Generate a set of outputs that "mint" coins for each recipient.
+/// Token ids are selected in a round-robin fashion.
 pub fn get_outputs<T: RngCore + CryptoRng>(
     recipient_and_amount: &[(PublicAddress, u64)],
+    token_ids: &[i32],
     rng: &mut T,
 ) -> Vec<TxOut> {
+    assert!(!token_ids.is_empty());
+
     recipient_and_amount
         .iter()
-        .map(|(recipient, value)| {
+        .enumerate()
+        .map(|(index, (recipient, value))| {
             TxOut::new(
                 *value,
                 recipient,
                 &RistrettoPrivate::from_random(rng),
                 Default::default(),
-                token_ids::MOB,
+                token_ids[index % token_ids.len()],
             )
             .unwrap()
         })

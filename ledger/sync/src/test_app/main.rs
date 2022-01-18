@@ -9,7 +9,7 @@ use mc_connection::{ConnectionManager, HardcodedCredentialsProvider, ThickClient
 use mc_consensus_scp::{test_utils::test_node_id, QuorumSet};
 use mc_ledger_db::{Ledger, LedgerDB};
 use mc_ledger_sync::{LedgerSync, LedgerSyncService, PollingNetworkState};
-use mc_transaction_core::{Block, BlockContents};
+use mc_transaction_core::{tx::token_ids, Block, BlockContents};
 use mc_util_uri::ConsensusClientUri as ClientUri;
 use std::{path::PathBuf, str::FromStr, sync::Arc};
 use tempdir::TempDir;
@@ -37,6 +37,7 @@ fn _make_ledger_long(ledger: &mut LedgerDB) {
         1000,
         1000,
         &last_block,
+        &[token_ids::MOB],
         &mut rng,
     );
 

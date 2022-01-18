@@ -58,7 +58,11 @@ mod tests {
             // Some outputs belonging to this account will be used as mix-ins.
             recipient_and_amounts.push((charlie.default_subaddress(), 65536));
             recipient_and_amounts.push((charlie.default_subaddress(), 65536));
-            mc_transaction_core_test_utils::get_outputs(&recipient_and_amounts, &mut rng)
+            mc_transaction_core_test_utils::get_outputs(
+                &recipient_and_amounts,
+                &[token_ids::MOB],
+                &mut rng,
+            )
         };
 
         let mut transaction_builder = TransactionBuilder::new(

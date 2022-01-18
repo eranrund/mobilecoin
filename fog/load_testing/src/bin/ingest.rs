@@ -22,7 +22,7 @@ use mc_fog_recovery_db_iface::RecoveryDb;
 use mc_fog_sql_recovery_db::test_utils::SqlRecoveryDbTestContext;
 use mc_fog_uri::{ConnectionUri, FogIngestUri, IngestPeerUri};
 use mc_ledger_db::{Ledger, LedgerDB};
-use mc_transaction_core::{Block, BlockContents, BlockSignature};
+use mc_transaction_core::{tx::token_ids, Block, BlockContents, BlockSignature};
 use mc_util_from_random::FromRandom;
 use mc_util_grpc::{admin_grpc::AdminApiClient, ConnectionUriGrpcioChannel, Empty};
 use mc_util_uri::AdminUri;
@@ -306,6 +306,7 @@ fn load_test(ingest_server_binary: &Path, test_params: TestParams, logger: Logge
                 CHUNK_SIZE,
                 CHUNK_SIZE,
                 &last_block,
+                &[token_ids::MOB],
                 &mut McRng {},
             );
 

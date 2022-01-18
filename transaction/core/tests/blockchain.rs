@@ -1,5 +1,5 @@
 use mc_account_keys::AccountKey;
-use mc_transaction_core::{Block, BlockContents};
+use mc_transaction_core::{tx::token_ids, Block, BlockContents};
 
 #[test]
 fn test_cumulative_txo_counts() {
@@ -18,6 +18,7 @@ fn test_cumulative_txo_counts() {
             50,
             50,
             &origin,
+            &[token_ids::MOB],
             &mut rng,
         );
 

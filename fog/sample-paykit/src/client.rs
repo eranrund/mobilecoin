@@ -663,16 +663,18 @@ fn build_transaction_helper<T: RngCore + CryptoRng, FPR: FogPubkeyResolver>(
         );
 
         let ring_len = ring.len();
-        tx_builder.add_input(
-            InputCredentials::new(
-                ring,
-                membership_proofs,
-                real_key_index,
-                onetime_private_key,
-                *source_account_key.view_private_key(),
+        tx_builder
+            .add_input(
+                InputCredentials::new(
+                    ring,
+                    membership_proofs,
+                    real_key_index,
+                    onetime_private_key,
+                    *source_account_key.view_private_key(),
+                )
+                .or(Err(Error::BrokenRing(ring_len, real_key_index)))?,
             )
-            .or(Err(Error::BrokenRing(ring_len, real_key_index)))?,
-        ).map_err(|e| Error::AddInput(e))?;
+            .map_err(|e| Error::AddInput(e))?;
     }
 
     // Resolve account server key if the receiver specifies an account service in
@@ -746,7 +748,7 @@ mod test_build_transaction_helper {
             for _i in 0..num_inputs {
                 recipient_and_amount.push((sender_public_address.clone(), initial_amount));
             }
-            let outputs = get_outputs(&recipient_and_amount, &mut rng);
+            let outputs = get_outputs(&recipient_and_amount, &[token_ids::MOB], &mut rng);
 
             let cached_inputs: Vec<(OwnedTxOut, TxOutMembershipProof)> = outputs
                 .into_iter()
@@ -788,7 +790,7 @@ mod test_build_transaction_helper {
                 for _i in 0..ring_size {
                     recipient_and_amount.push((sender_public_address.clone(), 33));
                 }
-                get_outputs(&recipient_and_amount, &mut rng)
+                get_outputs(&recipient_and_amount, &[token_ids::MOB], &mut rng)
             };
             assert_eq!(ring.len(), ring_size);
             rings.push(ring);
