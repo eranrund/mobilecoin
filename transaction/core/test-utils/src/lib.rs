@@ -90,16 +90,19 @@ pub fn create_transaction_with_amount<L: Ledger, R: RngCore + CryptoRng>(
     let mut transaction_builder = TransactionBuilder::new(
         MockFogResolver::default(),
         EmptyMemoBuilder::default(),
-        token_ids::MOB,
+        tx_out.token_id,
     );
 
-    // The first transaction in the origin block should contain enough outputs to
-    // use as mixins.
-    let origin_block_contents = ledger.get_block_contents(0).unwrap();
-    let origin_outputs = &origin_block_contents.outputs;
+    // Collect TxOuts for a ring.
+    let mut ring: Vec<TxOut> = (0..RING_SIZE)
+        .map(|idx| {
+            ledger
+                .get_tx_out_by_token_id_and_index(tx_out.token_id, idx as u64)
+                .unwrap()
+                .0
+        })
+        .collect();
 
-    // Populate a ring with mixins.
-    let mut ring: Vec<TxOut> = origin_outputs.iter().take(RING_SIZE).cloned().collect();
     if !ring.contains(tx_out) {
         ring[0] = tx_out.clone();
     }
