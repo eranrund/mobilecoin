@@ -1522,9 +1522,9 @@ checksum = "1b980f2816d6ee8673b6517b52cb0e808a180efc92e5c19d02cdda79066703ef"
 
 [[package]]
 name = "futures"
-version = "0.3.17"
+version = "0.3.21"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a12aa0eb539080d55c3f2d45a67c3b58b6b0773c1a3ca2dfec66d58c97fd66ca"
+checksum = "f73fe65f54d1e12b726f517d3e2135ca3125a437b6d998caf1962961f7172d9e"
 dependencies = [
  "futures-channel",
  "futures-core",
@@ -1537,9 +1537,9 @@ dependencies = [
 
 [[package]]
 name = "futures-channel"
-version = "0.3.17"
+version = "0.3.21"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5da6ba8c3bb3c165d3c7319fc1cc8304facf1fb8db99c5de877183c08a273888"
+checksum = "c3083ce4b914124575708913bca19bfe887522d6e2e6d0952943f5eac4a74010"
 dependencies = [
  "futures-core",
  "futures-sink",
@@ -1547,9 +1547,9 @@ dependencies = [
 
 [[package]]
 name = "futures-core"
-version = "0.3.17"
+version = "0.3.21"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "88d1c26957f23603395cd326b0ffe64124b818f4449552f960d815cfba83a53d"
+checksum = "0c09fd04b7e4073ac7156a9539b57a484a8ea920f79c7c675d05d289ab6110d3"
 
 [[package]]
 name = "futures-cpupool"
@@ -1563,9 +1563,9 @@ dependencies = [
 
 [[package]]
 name = "futures-executor"
-version = "0.3.17"
+version = "0.3.21"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "45025be030969d763025784f7f355043dc6bc74093e4ecc5000ca4dc50d8745c"
+checksum = "9420b90cfa29e327d0429f19be13e7ddb68fa1cccb09d65e5706b8c7a749b8a6"
 dependencies = [
  "futures-core",
  "futures-task",
@@ -1574,9 +1574,9 @@ dependencies = [
 
 [[package]]
 name = "futures-io"
-version = "0.3.17"
+version = "0.3.21"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "522de2a0fe3e380f1bc577ba0474108faf3f6b18321dbf60b3b9c39a75073377"
+checksum = "fc4045962a5a5e935ee2fdedaa4e08284547402885ab326734432bed5d12966b"
 
 [[package]]
 name = "futures-lite"
@@ -1595,12 +1595,10 @@ dependencies = [
 
 [[package]]
 name = "futures-macro"
-version = "0.3.17"
+version = "0.3.21"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "18e4a4b95cea4b4ccbcf1c5675ca7c4ee4e9e75eb79944d07defde18068f79bb"
+checksum = "33c1e13800337f4d4d7a316bf45a567dbcb6ffe087f16424852d97e97a91f512"
 dependencies = [
- "autocfg",
- "proc-macro-hack",
  "proc-macro2 1.0.32",
  "quote 1.0.10",
  "syn 1.0.81",
@@ -1608,23 +1606,22 @@ dependencies = [
 
 [[package]]
 name = "futures-sink"
-version = "0.3.17"
+version = "0.3.21"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "36ea153c13024fe480590b3e3d4cad89a0cfacecc24577b68f86c6ced9c2bc11"
+checksum = "21163e139fa306126e6eedaf49ecdb4588f939600f0b1e770f4205ee4b7fa868"
 
 [[package]]
 name = "futures-task"
-version = "0.3.17"
+version = "0.3.21"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1d3d00f4eddb73e498a54394f228cd55853bdf059259e8e7bc6e69d408892e99"
+checksum = "57c66a976bf5909d801bbef33416c41372779507e7a6b3a5e25e4749c58f776a"
 
 [[package]]
 name = "futures-util"
-version = "0.3.17"
+version = "0.3.21"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "36568465210a3a6ee45e1f165136d68671471a501e632e9a98d96872222b5481"
+checksum = "d8b7abd5d659d9b90c8cba917f6ec750a74e2dc23902ef9cd4cc8c8b22e6036a"
 dependencies = [
- "autocfg",
  "futures-channel",
  "futures-core",
  "futures-io",
@@ -1634,8 +1631,6 @@ dependencies = [
  "memchr",
  "pin-project-lite 0.2.7",
  "pin-utils",
- "proc-macro-hack",
- "proc-macro-nested",
  "slab",
 ]
 
@@ -1724,7 +1719,7 @@ name = "go-grpc-gateway-testing"
 version = "1.0.0"
 dependencies = [
  "displaydoc",
- "futures 0.3.17",
+ "futures 0.3.21",
  "grpcio",
  "mc-attest-core",
  "mc-common",
@@ -1743,7 +1738,7 @@ name = "grpcio"
 version = "0.9.0"
 source = "git+https://github.com/mobilecoinofficial/grpc-rs?rev=10ba9f8f4546916c7e7532c4d1c6cdcf5df62553#10ba9f8f4546916c7e7532c4d1c6cdcf5df62553"
 dependencies = [
- "futures 0.3.17",
+ "futures 0.3.21",
  "grpcio-sys",
  "libc",
  "log 0.4.11",
@@ -2671,7 +2666,7 @@ dependencies = [
  "aead",
  "cargo-emit",
  "digest 0.9.0",
- "futures 0.3.17",
+ "futures 0.3.21",
  "grpcio",
  "mc-attest-ake",
  "mc-attest-enclave-api",
@@ -2874,7 +2869,7 @@ name = "mc-consensus-api"
 version = "1.2.0-pre0"
 dependencies = [
  "cargo-emit",
- "futures 0.3.17",
+ "futures 0.3.21",
  "grpcio",
  "mc-api",
  "mc-attest-api",
@@ -3045,7 +3040,7 @@ dependencies = [
  "curve25519-dalek",
  "displaydoc",
  "fs_extra",
- "futures 0.3.17",
+ "futures 0.3.21",
  "grpcio",
  "hex",
  "lazy_static",
@@ -3320,7 +3315,7 @@ version = "1.2.0-pre0"
 dependencies = [
  "cargo-emit",
  "displaydoc",
- "futures 0.3.17",
+ "futures 0.3.21",
  "grpcio",
  "mc-api",
  "mc-attest-api",
@@ -3550,7 +3545,7 @@ version = "1.2.0-pre0"
 dependencies = [
  "dirs 4.0.0",
  "displaydoc",
- "futures 0.3.17",
+ "futures 0.3.21",
  "grpcio",
  "hex",
  "itertools 0.10.1",
@@ -3733,7 +3728,7 @@ version = "1.2.0-pre0"
 dependencies = [
  "curve25519-dalek",
  "displaydoc",
- "futures 0.3.17",
+ "futures 0.3.21",
  "grpcio",
  "hex",
  "lazy_static",
@@ -3887,7 +3882,7 @@ name = "mc-fog-report-api"
 version = "1.2.0-pre0"
 dependencies = [
  "cargo-emit",
- "futures 0.3.17",
+ "futures 0.3.21",
  "grpcio",
  "mc-api",
  "mc-attest-api",
@@ -3953,7 +3948,7 @@ name = "mc-fog-report-server"
 version = "1.2.0-pre0"
 dependencies = [
  "displaydoc",
- "futures 0.3.17",
+ "futures 0.3.21",
  "grpcio",
  "mc-attest-core",
  "mc-common",
@@ -4024,7 +4019,7 @@ version = "1.2.0-pre0"
 dependencies = [
  "cargo-emit",
  "displaydoc",
- "futures 0.3.17",
+ "futures 0.3.21",
  "grpcio",
  "link-cplusplus",
  "mc-account-keys",
@@ -4389,7 +4384,7 @@ name = "mc-fog-view-server"
 version = "1.2.0-pre0"
 dependencies = [
  "displaydoc",
- "futures 0.3.17",
+ "futures 0.3.21",
  "grpcio",
  "hex",
  "lazy_static",
@@ -4603,7 +4598,7 @@ name = "mc-mobilecoind-api"
 version = "1.2.0-pre0"
 dependencies = [
  "cargo-emit",
- "futures 0.3.17",
+ "futures 0.3.21",
  "grpcio",
  "hex_fmt",
  "mc-api",
@@ -5121,7 +5116,7 @@ dependencies = [
  "base64 0.13.0",
  "cookie 0.15.1",
  "displaydoc",
- "futures 0.3.17",
+ "futures 0.3.21",
  "grpcio",
  "hex",
  "hex_fmt",
@@ -5320,7 +5315,7 @@ name = "mc-watcher"
 version = "1.2.0-pre0"
 dependencies = [
  "displaydoc",
- "futures 0.3.17",
+ "futures 0.3.21",
  "grpcio",
  "hex",
  "lazy_static",
@@ -5719,7 +5714,7 @@ checksum = "e1cf9b1c4e9a6c4de793c632496fa490bdc0e1eea73f0c91394f7b6990935d22"
 dependencies = [
  "async-trait",
  "crossbeam-channel",
- "futures 0.3.17",
+ "futures 0.3.21",
  "js-sys",
  "lazy_static",
  "percent-encoding 2.1.0",
@@ -6129,12 +6124,6 @@ name = "proc-macro-hack"
 version = "0.5.19"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "dbf0c48bc1d91375ae5c3cd81e3722dff1abcf81a30960240640d223f59fe0e5"
-
-[[package]]
-name = "proc-macro-nested"
-version = "0.1.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8e946095f9d3ed29ec38de908c22f95d9ac008e424c7bcae54c75a79c527c694"
 
 [[package]]
 name = "proc-macro2"
