@@ -1300,9 +1300,9 @@ checksum = "4358a9e11b9a09cf52383b451b49a169e8d797b68aa02301ff586d70d9661ea3"
 
 [[package]]
 name = "ed25519"
-version = "1.2.0"
+version = "1.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4620d40f6d2601794401d6dd95a5cf69b6c157852539470eeda433a99b3c0efc"
+checksum = "d916019f70ae3a1faa1195685e290287f39207d38e6dfee727197cffcc002214"
 dependencies = [
  "serde",
  "signature",
