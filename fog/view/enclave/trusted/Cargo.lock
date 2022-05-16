@@ -402,9 +402,9 @@ dependencies = [
 
 [[package]]
 name = "ed25519"
-version = "1.2.0"
+version = "1.5.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4620d40f6d2601794401d6dd95a5cf69b6c157852539470eeda433a99b3c0efc"
+checksum = "f9cb2103c580a9f8732121f755eccb51312f7db26314664314c119298107064b"
 dependencies = [
  "serde",
  "signature",
