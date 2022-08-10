@@ -19,10 +19,20 @@ checksum = "ee2a4ec343196209d6594e19543ae87a39f96d5534d7174822a3ad825dd6ed7e"
 
 [[package]]
 name = "aead"
-version = "0.4.1"
+version = "0.4.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "922b33332f54fc0ad13fa3e514601e8d30fb54e1f3eadc36643f6526db645621"
+checksum = "0b613b8e1e3cf911a086f53f03bf286f52fd7a7258e4fa606f0ef220d39d8877"
 dependencies = [
+ "generic-array 0.14.4",
+]
+
+[[package]]
+name = "aead"
+version = "0.5.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5c192eb8f11fc081b0fe4259ba5af04217d4e0faddd02417310a927911abd7c8"
+dependencies = [
+ "crypto-common",
  "generic-array 0.14.4",
 ]
 
@@ -45,7 +55,7 @@ version = "0.9.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "df5f85a83a7d8b0442b6aa7b504b8212c1733da07b98aae43d4bc21b2cb3cdf6"
 dependencies = [
- "aead",
+ "aead 0.4.3",
  "aes",
  "cipher",
  "ctr",
@@ -925,6 +935,17 @@ name = "crunchy"
 version = "0.1.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a2f4a431c5c9f662e1200b7c7f02c34e91361150e382089a8f2dec3ba680cbda"
+
+[[package]]
+name = "crypto-common"
+version = "0.1.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1bfb12502f3fc46cca1bb51ac28df9d618d813cdc3d2f25b9fe775a34af26bb3"
+dependencies = [
+ "generic-array 0.14.4",
+ "rand_core 0.6.3",
+ "typenum",
+]
 
 [[package]]
 name = "crypto-mac"
@@ -2643,7 +2664,7 @@ dependencies = [
 name = "mc-attest-ake"
 version = "1.2.0-pre0"
 dependencies = [
- "aead",
+ "aead 0.5.1",
  "aes-gcm",
  "cargo-emit",
  "digest 0.9.0",
@@ -2668,7 +2689,7 @@ dependencies = [
 name = "mc-attest-api"
 version = "1.2.0-pre0"
 dependencies = [
- "aead",
+ "aead 0.5.1",
  "cargo-emit",
  "digest 0.9.0",
  "futures 0.3.17",
@@ -3120,7 +3141,7 @@ dependencies = [
 name = "mc-crypto-box"
 version = "1.2.0-pre0"
 dependencies = [
- "aead",
+ "aead 0.5.1",
  "blake2",
  "digest 0.9.0",
  "displaydoc",
@@ -3239,7 +3260,7 @@ dependencies = [
 name = "mc-crypto-noise"
 version = "1.2.0-pre0"
 dependencies = [
- "aead",
+ "aead 0.5.1",
  "aes-gcm",
  "digest 0.9.0",
  "displaydoc",
@@ -4646,7 +4667,7 @@ version = "0.9.5-pre1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2d530bc1c22cc6b8e315cbe565a951c69b475542fd499a25d04f0a478c17ca6b"
 dependencies = [
- "aead",
+ "aead 0.4.3",
  "aes",
  "cipher",
  "ctr",
@@ -8121,9 +8142,9 @@ checksum = "1410f6f91f21d1612654e7cc69193b0334f909dcf2c790c4826254fbb86f8887"
 
 [[package]]
 name = "typenum"
-version = "1.12.0"
+version = "1.15.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "373c8a200f9e67a0c95e62a4f52fbf80c23b4381c05a17845531982fa99e6b33"
+checksum = "dcf81ac59edc17cc8697ff311e8f5ef2d99fcbd9817b34cec66f90b6c3dfd987"
 
 [[package]]
 name = "uname"
