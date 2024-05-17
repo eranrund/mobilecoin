@@ -2216,9 +2216,9 @@ dependencies = [
 
 [[package]]
 name = "itertools"
-version = "0.12.1"
+version = "0.13.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ba291022dbbd398a455acf126c1e341954079855bc60dfdda641363bd6922569"
+checksum = "413ee7dfc52ee1a4949ceeb7dbc8a33f2d6c088194d9f922fb8318faf1f01186"
 dependencies = [
  "either",
 ]
@@ -3882,7 +3882,7 @@ dependencies = [
  "futures",
  "grpcio",
  "hex",
- "itertools 0.12.1",
+ "itertools 0.13.0",
  "lazy_static",
  "mc-api",
  "mc-attest-api",
@@ -4104,7 +4104,7 @@ dependencies = [
  "displaydoc",
  "futures",
  "grpcio",
- "itertools 0.12.1",
+ "itertools 0.13.0",
  "lazy_static",
  "mc-account-keys",
  "mc-api",
@@ -4797,7 +4797,7 @@ name = "mc-fog-view-enclave-impl"
 version = "5.2.3"
 dependencies = [
  "aligned-cmov",
- "itertools 0.12.1",
+ "itertools 0.13.0",
  "mc-attest-core",
  "mc-attest-enclave-api",
  "mc-common",
@@ -6231,7 +6231,7 @@ name = "mc-util-parse"
 version = "5.2.3"
 dependencies = [
  "hex",
- "itertools 0.12.1",
+ "itertools 0.13.0",
  "mc-sgx-css",
 ]
 
@@ -6288,7 +6288,7 @@ name = "mc-util-test-helper"
 version = "5.2.3"
 dependencies = [
  "clap 4.5.1",
- "itertools 0.12.1",
+ "itertools 0.13.0",
  "lazy_static",
  "mc-account-keys",
  "mc-common",
